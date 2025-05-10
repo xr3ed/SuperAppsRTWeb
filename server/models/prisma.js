@@ -1,7 +1,5 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 // const { Pool } = require('pg'); // Hapus atau komentari pg Pool
-
-// Import Prisma Client secara standar
 const { PrismaClient } = require('@prisma/client');
 
 // Log the DATABASE_URL that will be used by Prisma
