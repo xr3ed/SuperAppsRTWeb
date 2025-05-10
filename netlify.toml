@@ -4,9 +4,9 @@
   # Build command untuk frontend dan backend
   command = """
     npm install && \
-    npx prisma generate && \
+    cd server && npm install && npm install @prisma/client && \
+    cd .. && npx prisma generate && \
     cd client && npm install && npm run build && \
-    cd ../server && npm install && \
     cd ..
   """
   # Direktori tempat Netlify akan mencari fungsi serverless Anda
