@@ -1,0 +1,32 @@
+{
+  "name": "superapps-rt-web",
+  "version": "1.0.0",
+  "description": "SuperApps RT Web Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm start",
+    "client": "cd client && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "prisma:generate": "prisma generate --schema ./prisma/schema.prisma"
+  },
+  "keywords": [
+    "react",
+    "express",
+    "fullstack"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "6.7.0",
+    "prisma": "6.7.0",
+    "concurrently": "^8.2.2",
+    "pg": "^8.15.6",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "electron": "^36.2.0",
+    "electron-builder": "^26.0.12"
+  }
+}

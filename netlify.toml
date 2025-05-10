@@ -1,0 +1,35 @@
+# netlify.toml
+
+[build]
+  # Build command untuk frontend dan backend
+  command = """
+    npm install && \
+    npx prisma generate && \
+    cd client && npm install && npm run build && \
+    cd ../server && npm install && \
+    cd ..
+  """
+  # Direktori tempat Netlify akan mencari fungsi serverless Anda
+  functions = "server"
+  # Direktori build frontend
+  publish = "client/build"
+
+# Environment variables yang diperlukan
+[build.environment]
+  NODE_VERSION = "18"
+  NODE_ENV = "production"
+
+# (Sangat Direkomendasikan) Redirects agar URL API lebih bersih
+# Ini akan mengarahkan permintaan dari /api/* ke fungsi netlify-handler.js Anda.
+# Pastikan nama fungsi ('netlify-handler' dalam contoh ini) sesuai dengan nama file .js Anda di direktori 'server/'.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/netlify-handler/:splat"
+  status = 200 # Menggunakan 200 agar method (GET, POST, dll) tetap sama
+  force = true # Pastikan aturan ini diutamakan jika ada konflik
+
+# Handle SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 

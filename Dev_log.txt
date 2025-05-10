@@ -1,0 +1,468 @@
+# Log Pengembangan SuperApps RT Web
+
+## Struktur Proyek Utama
+📁 client/ (Frontend berbasis React.js)
+  📄 package.json (Konfigurasi frontend)
+  📄 postcss.config.js (Konfigurasi PostCSS untuk TailwindCSS)
+  📄 tailwind.config.js (Konfigurasi TailwindCSS)
+  📁 src/ (Kode sumber frontend)
+    📁 components/ (Komponen-komponen React)
+      📁 layout/ (Komponen layout seperti sidebar, header)
+      📁 warga/ (Komponen terkait warga)
+        📄 WargaSidebar.js (Komponen sidebar untuk menampilkan daftar Kepala Keluarga dengan fitur accordion)
+        📄 WargaFilterComponent.js (Komponen UI untuk filter daftar warga individu)
+      📁 kegiatan/ (Komponen terkait kegiatan)
+      📁 iuran/ (Komponen terkait iuran)
+      📁 kartuKeluarga/ (Komponen terkait kartu keluarga)
+        📄 AddAnggotaForm.js (Form untuk menambah anggota keluarga)
+        📄 CreateKKForm.js (Form untuk membuat KK baru)
+        📄 RegistrasiKeluargaModal.js (Modal registrasi keluarga)
+        📄 DetailKartuKeluargaModal.js (Modal untuk menampilkan detail kartu keluarga)
+        📄 EditAnggotaFormModal.js (Modal form untuk mengedit data anggota keluarga)
+        📄 DetailAnggotaModal.js (Modal CV-like untuk detail anggota)
+      📁 modals/ (Komponen modal umum atau fitur spesifik)
+        📄 ColumnSelectorModal.js (Modal untuk memilih kolom ekspor)
+    📁 pages/ (Halaman utama aplikasi)
+      📄 Warga.js (Halaman terpadu untuk manajemen warga dan kartu keluarga)
+    📁 services/ (Layanan API)
+  📁 public/ (Aset statis frontend)
+  📁 node_modules/ (Dependensi frontend)
+
+📁 server/ (Backend berbasis Express.js)
+  📄 package.json (Konfigurasi backend)
+  📄 index.js (Entry point server)
+  📁 routes/ (Definisi rute API)
+  📁 controllers/ (Logika bisnis)
+  📁 models/ (Model data)
+  📁 node_modules/ (Dependensi backend)
+
+📁 prisma/ (Konfigurasi Prisma ORM)
+
+📁 public/ (Aset statis berbagi)
+
+📄 package.json (Konfigurasi root untuk menjalankan client dan server)
+
+## Riwayat Pengembangan
+
+### [2023-06-15] - Setup Awal Proyek
+- Inisialisasi struktur proyek client-server
+- Setup React untuk frontend
+- Setup Express untuk backend
+- Penambahan Tailwind CSS untuk styling
+
+### [2023-06-28] - Pengembangan UI Dasar
+- Implementasi sidebar navigasi
+- Implementasi header dengan fitur pencarian
+- Konfigurasi routing dasar
+
+### [2023-07-10] - Integrasi Database
+- Setup Prisma sebagai ORM
+- Definisi model data awal
+
+### [2023-07-25] - Pengembangan Fitur Dasar
+- Implementasi autentikasi
+- Pengembangan CRUD dasar untuk data warga
+
+### [2024-05-10] - Migrasi ke PostgreSQL Online
+- Menghapus folder migrasi lama (SQLite) dan membuat migrasi baru untuk PostgreSQL.
+- Mengubah datasource di schema.prisma menjadi PostgreSQL dan menggunakan env("DATABASE_URL").
+- Menjalankan migrasi ke database PostgreSQL online (Railway) dengan sukses.
+- Memastikan Prisma Client di-generate dan database online sinkron dengan schema terbaru.
+- **File yang dimodifikasi**:
+  - `prisma/schema.prisma` (ubah provider ke postgresql)
+  - `prisma/migrations/` (folder migrasi baru dibuat)
+- **Catatan**: Semua data lama di database online terhapus karena reset schema. Pastikan backup data penting sebelum migrasi.
+
+### [2024-05-18] - Perbaikan Konfigurasi dan Bug
+- Pembuatan file package.json di root untuk menjalankan client dan server secara bersamaan
+- Perbaikan masalah konfigurasi TailwindCSS di PostCSS
+- Migrasi dari `@tailwindcss/postcss` ke `tailwindcss` standar
+- Memperbarui PostCSS config untuk menggunakan plugin TailwindCSS versi 3
+- Menyelesaikan masalah port yang sudah digunakan
+- Berhasil menjalankan aplikasi secara lengkap (frontend dan backend)
+
+### [2024-05-22] - Pengembangan Modul Kegiatan RT
+- Implementasi API backend untuk modul Kegiatan (controllers, routes)
+- Pengembangan service untuk integrasi dengan API Kegiatan
+- Pembuatan komponen UI untuk pengelolaan Kegiatan:
+  - Form untuk menambah/mengedit kegiatan
+  - Komponen untuk menampilkan detail kegiatan
+  - Komponen untuk manajemen peserta kegiatan
+- Implementasi fitur pencarian dan filter kegiatan
+- Implementasi manajemen peserta kegiatan dengan fitur CRUD
+- Integrasi dengan data Warga yang sudah ada
+
+### [2024-05-27] - Migrasi ke PostgreSQL Supabase
+- Migrasi database dari Railway PostgreSQL ke Supabase PostgreSQL untuk meningkatkan performa dan ketersediaan.
+- Konfigurasi koneksi database dengan Supabase:
+  - Update DATABASE_URL dan DIRECT_URL di file .env untuk menggunakan kredensial Supabase
+  - Modifikasi schema.prisma untuk menggunakan directUrl untuk proses migrasi 
+  - Menjalankan migrasi database ke Supabase dengan sukses
+- Perbaikan koneksi database di server:
+  - Modifikasi server/models/prisma.js untuk menangani parameter koneksi pgbouncer=true
+  - Konfigurasi SSL dan opsi koneksi untuk meningkatkan performa dan stabilitas
+- Penyesuaian query di controller untuk kompatibilitas dengan PostgreSQL Supabase:
+  - Update nama kolom di server/controllers/wargaController.js agar sesuai dengan convention Prisma di PostgreSQL
+- **File yang dimodifikasi**:
+  - `.env` dan `server/.env` (update string koneksi database)
+  - `prisma/schema.prisma` (penambahan directUrl untuk koneksi migrasi)
+  - `server/models/prisma.js` (perbaikan handling koneksi PostgreSQL)
+  - `server/controllers/wargaController.js` (penyesuaian query SQL)
+- **Teknologi**:
+  - Supabase PostgreSQL sebagai database primer
+  - PgBouncer untuk connection pooling
+  - pg (node-postgres) untuk koneksi database langsung
+
+### [2024-06-12] - Pengembangan Modul Kartu Keluarga
+- Implementasi API backend untuk modul Kartu Keluarga (controllers, routes)
+- Integrasi dengan model data Warga yang sudah ada
+- Implementasi relasi antara Kartu Keluarga dan Warga melalui model KeluargaWarga
+- Pengembangan fitur:
+  - CRUD untuk data Kartu Keluarga
+  - Penambahan/Penghapusan anggota keluarga
+  - Manajemen status hubungan anggota dalam keluarga
+  - Validasi untuk perubahan Kepala Keluarga
+- Registrasi route API `/api/kartukeluarga` di server
+- **File yang dibuat**:
+  - `server/controllers/kartuKeluargaController.js`
+  - `server/routes/kartuKeluarga.js`
+- **File yang dimodifikasi**:
+  - `server/index.js` (untuk menambahkan route Kartu Keluarga)
+
+### [2024-06-13] - Optimisasi Relasi KartuKeluarga dan Warga
+- Optimisasi struktur data untuk menghindari redundansi data alamat
+- Perubahan skema database:
+  - Menghapus field alamat, rt, rw, kelurahan, kecamatan dari model Warga
+  - Menambahkan field alamat_domisili opsional di model Warga (hanya untuk kasus khusus)
+- Modifikasi controller Warga untuk memanfaatkan alamat dari Kartu Keluarga
+- Implementasi relasi yang lebih efisien dengan pendekatan "single source of truth"
+- Pembuatan migrasi database `remove_redundant_address_fields`
+- **File yang dimodifikasi**:
+  - `prisma/schema.prisma`
+  - `server/controllers/wargaController.js`
+
+### [2024-06-25] - Implementasi Fitur FAB Registrasi Keluarga
+- Pengembangan frontend untuk pengelolaan Kartu Keluarga
+- Implementasi halaman Kartu Keluarga dengan daftar KK dan informasi anggota
+- Pengembangan fitur Floating ActionButton (FAB) untuk Registrasi Keluarga dengan dua alur utama:
+  1. Buat KK Baru:
+     - Form multi-step untuk data KK, Kepala Keluarga, dan anggota
+     - Validasi input untuk setiap langkah
+     - Fungsionalitas untuk menambahkan beberapa anggota keluarga
+  2. Tambah ke KK yang Sudah Ada:
+     - Pemilihan KK yang sudah terdaftar
+     - Form input data anggota baru
+- Integrasi dengan API kartuKeluarga dan warga
+- Implementasi validasi untuk memeriksa NIK dan status hubungan
+- Penambahan menu Kartu Keluarga di sidebar aplikasi
+- **File yang dibuat**:
+  - `client/src/pages/KartuKeluarga.js`
+  - `client/src/components/kartuKeluarga/RegistrasiKeluargaModal.js`
+  - `client/src/components/kartuKeluarga/CreateKKForm.js`
+  - `client/src/components/kartuKeluarga/AddAnggotaForm.js`
+- **File yang dimodifikasi**:
+  - `client/src/services/api.js` (penambahan kartuKeluargaService)
+  - `client/src/App.js` (penambahan route untuk KartuKeluarga)
+  - `client/src/components/layout/Sidebar.js` (penambahan menu Kartu Keluarga)
+- Build sukses dengan hanya beberapa warning eslint minor
+
+### [2024-06-30] - Peningkatan UI/UX Manajemen Kepala Keluarga dan Anggota Keluarga
+- Implementasi UI/UX baru untuk fitur manajemen Kepala Keluarga dan Anggota Keluarga berdasarkan desain yang disetujui
+- Implementasi tampilan sidebar Kepala Keluarga dengan fitur accordion
+- Pengembangan modal popup untuk menampilkan dan mengelola detail Kepala Keluarga dan Anggota Keluarga
+- Integrasi tampilan accordion untuk menampilkan data Kepala Keluarga dan Anggota Keluarga secara hierarkis
+- Implementasi tombol aksi untuk operasi CRUD pada Kepala Keluarga dan Anggota Keluarga
+- Penggunaan animasi halus untuk meningkatkan pengalaman pengguna saat interaksi dengan komponen
+- Pembaruan halaman Kartu Keluarga untuk mengintegrasikan sidebar warga dan modal detail
+- **File yang dibuat**:
+  - `client/src/components/kartuKeluarga/DetailKeluargaModal.js` (Modal detail keluarga dengan fitur accordion)
+- **File yang dimodifikasi**:
+  - `client/src/components/warga/WargaSidebar.js` (Implementasi fitur accordion dan aksi CRUD)
+  - `client/src/pages/KartuKeluarga.js` (Integrasi sidebar dan modal detail)
+- Build sukses dengan beberapa warning eslint yang sudah diperbaiki
+
+### [2024-07-05] - Penyempurnaan UI/UX Fitur Manajemen Kepala Keluarga dan Anggota Keluarga
+- Penerapan desain UI/UX baru yang lebih modern dan intuitif untuk fitur manajemen warga
+- Peningkatan komponen sidebar Kepala Keluarga:
+  - Desain accordion yang lebih menarik dengan animasi transisi halus
+  - Penambahan detail informasi pada setiap item Kepala Keluarga
+  - Integrasi ikon intuitif dan penanda status yang jelas
+- Penyempurnaan modal detail kartu keluarga:
+  - Layout hierarkis yang memisahkan informasi Kepala Keluarga dan Anggota
+  - Implementasi accordion untuk data Anggota Keluarga dengan animasi expand/collapse
+  - Peningkatan UI untuk tombol aksi (edit, hapus, tambah anggota)
+- Pengembangan Floating Action Button (FAB) dengan animasi dan sub-menu
+- Perbaikan tampilan form pendaftaran anggota keluarga:
+  - Desain form yang lebih clean dengan validasi interaktif
+  - Support untuk KK yang dipilih dari sidebar maupun modal
+- Implementasi feedback visual untuk semua interaksi user (hover, aktif, loading)
+- **File yang dimodifikasi**:
+  - `client/src/components/warga/WargaSidebar.js` (UI yang lebih modern dengan feedback visual)
+  - `client/src/components/kartuKeluarga/DetailKeluargaModal.js` (Peningkatan UI modal dan interaksi)
+  - `client/src/components/kartuKeluarga/RegistrasiKeluargaModal.js` (Penyesuaian untuk alur pendaftaran yang lebih jelas)
+  - `client/src/components/kartuKeluarga/AddAnggotaForm.js` (Peningkatan UI form dan validasi)
+  - `client/src/pages/KartuKeluarga.js` (Integrasi FAB dan card dengan desain baru)
+- Build sukses tanpa error dengan hanya beberapa warning minor
+
+### [2024-07-10] - Penguatan Integrasi Warga dan Kartu Keluarga
+- Implementasi relasi kepala keluarga yang lebih kuat antara model Warga dan KartuKeluarga
+- Penambahan field `kepalaKeluargaId` di model KartuKeluarga untuk mereferensikan Warga yang menjadi kepala keluarga
+- Implementasi skema relasi dua arah antara Warga dan KartuKeluarga (@relation name: "KepalaKeluarga")
+- Penyesuaian controller untuk menggunakan relasi baru:
+  - Pengembangan format response API untuk informasi kepala keluarga yang lebih lengkap
+  - Validasi integritas data saat penambahan/perpindahan kepala keluarga
+- Pengembangan API endpoint baru: `/kartukeluarga/:id/kepalakeluarga` untuk memperbarui kepala keluarga
+- Peningkatan UI untuk menampilkan informasi kepala keluarga yang lebih jelas:
+  - Tampilan ikon khusus (crown) untuk kepala keluarga di WargaSidebar
+  - Penambahan section detail kepala keluarga di DetailKeluargaModal
+- Persiapan dashboard terintegrasi untuk menampilkan data warga dan kartu keluarga secara terpadu
+- Migrasi database sukses: `20250508053647_add_kepala_keluarga_id`
+- **File yang dimodifikasi**:
+  - `prisma/schema.prisma` (model Warga dan KartuKeluarga)
+  - `server/controllers/kartuKeluargaController.js` (implementasi relasi kepala keluarga)
+  - `server/controllers/wargaController.js` (response dengan data kepala keluarga)
+  - `server/routes/kartuKeluarga.js` (penambahan rute baru)
+  - `client/src/services/api.js` (update service untuk kepala keluarga)
+  - `client/src/components/warga/WargaSidebar.js` (UI untuk kepala keluarga)
+  - `client/src/components/kartuKeluarga/DetailKeluargaModal.js` (tampilan detail kepala keluarga)
+- Build sukses tanpa error
+
+### [2024-07-15] - Integrasi Modul Warga dan Kartu Keluarga
+- Restrukturisasi UI untuk menyederhanakan navigasi dengan menggabungkan menu Warga dan Kartu Keluarga menjadi satu entry point
+- Implementasi sistem tab pada halaman Warga:
+  - Tab "Kartu Keluarga" (default) - Menampilkan manajemen unit keluarga
+  - Tab "Daftar Warga" - Menampilkan daftar individu warga
+- Pengembangan antarmuka dengan Kartu Keluarga sebagai tampilan default saat mengakses menu Warga
+- Migrasi seluruh fungsionalitas dari halaman KartuKeluarga.js ke dalam halaman Warga.js
+- Penambahan state dan fungsi untuk mengelola tampilan tab dan transisi antar tab
+- Integrasi dengan komponen-komponen existing:
+  - WargaSidebar untuk menampilkan daftar Kepala Keluarga
+  - DetailKeluargaModal untuk detail kartu keluarga
+  - RegistrasiKeluargaModal untuk pendaftaran kartu keluarga baru
+- Implementasi fungsi untuk beralih antar tab dan melihat detail kartu keluarga dari data warga
+- **File yang dihapus**:
+  - `client/src/pages/KartuKeluarga.js` (fungsionalitas dipindahkan ke Warga.js)
+- **File yang dimodifikasi**:
+  - `client/src/components/layout/Sidebar.js` (menghapus item menu Kartu Keluarga)
+  - `client/src/App.js` (menghapus route /kartukeluarga)
+  - `client/src/pages/Warga.js` (penambahan struktur tab dan integrasi fungsionalitas Kartu Keluarga)
+- Build sukses dengan beberapa warning eslint minor terkait variabel yang tidak digunakan
+
+### [2024-07-20] - Perbaikan UI/UX dan Penanganan Error pada Modul Kartu Keluarga
+- Perbaikan UI/UX halaman Warga dengan menyempurnakan tampilan tab "Kartu Keluarga"
+- Implementasi mekanisme penanganan error yang lebih user-friendly dengan tombol "Coba Lagi"
+- Penambahan tombol refresh pada komponen-komponen utama (WargaSidebar, DetailKeluargaModal)
+- Standardisasi komponen error message dengan memanfaatkan kelas utilitas baru
+- Perbaikan indikator loading untuk memberikan feedback visual yang lebih baik kepada pengguna
+- Peningkatan hover effect pada card dan elemen interaktif
+- Optimasi user flow dengan menutup menu FAB secara otomatis setelah pengguna memilih opsi
+- Perbaikan tata letak pada dialog detail kartu keluarga
+- Penambahan pesan informasi ketika data tidak tersedia
+- **File yang dimodifikasi**:
+  - `client/src/pages/Warga.js` (Perbaikan UI dan penanganan error)
+  - `client/src/components/warga/WargaSidebar.js` (Penambahan tombol refresh dan perbaikan tampilan error)
+  - `client/src/components/kartuKeluarga/DetailKeluargaModal.js` (Penambahan tombol refresh dan perbaikan tampilan error)
+  - `client/src/components/kartuKeluarga/RegistrasiKeluargaModal.js` (Penyesuaian tampilan header untuk konsistensi)
+  - `client/src/index.css` (Penambahan kelas utilitas baru untuk penanganan error dan efek UI)
+- Build sukses tanpa error
+
+### [2024-07-22] - Penyesuaian Form Input Data Warga pada Pembuatan KK Baru
+- **Penyamaan Field Input `CreateKKForm.js`**:
+  - Form input untuk Kepala Keluarga (Step 2) dan Anggota Keluarga (Step 3) disamakan dan dilengkapi field-fieldnya (NIK, Nama Lengkap, Tempat/Tgl Lahir, Jenis Kelamin, Agama, Status Perkawinan, Pekerjaan, Pendidikan Terakhir, Kewarganegaraan).
+  - Field `statusHubungan` pada Step 2 (Kepala Keluarga) diatur otomatis sebagai "Kepala Keluarga" dan bersifat read-only.
+- **Penyesuaian Opsi Status Hubungan**:
+  - Opsi pada dropdown "Status Hubungan" di Step 3 (`CreateKKForm.js`) disesuaikan agar lebih lengkap sesuai gambar (Istri, Anak, Cucu, Orang Tua, Mertua, Menantu, Famili Lain, Lainnya).
+- **Verifikasi Backend**:
+  - Dipastikan bahwa field-field baru yang dikirim dari frontend (`agama`, `statusPerkawinan`, `pekerjaan`, `pendidikanTerakhir`, `kewarganegaraan`) sudah dapat diterima oleh controller `wargaController.js` dan didukung oleh model `Warga` di `prisma/schema.prisma`.
+- **Build Status**:
+  - Build sisi client (`cd client && npm run build`) berhasil, dengan beberapa warning ESLint yang sudah ada sebelumnya.
+- **File yang dimodifikasi**:
+  - `client/src/components/kartuKeluarga/CreateKKForm.js`
+
+### [2024-07-23] - Implementasi Fitur Edit Anggota Keluarga (Lanjutan)
+- Melanjutkan implementasi fitur edit anggota keluarga yang sebelumnya belum tuntas.
+- Tombol "Edit" pada `DetailKeluargaModal.js` diubah agar mengirim seluruh objek `anggota` ke fungsi `handleEditAnggotaInKK` di `Warga.js`.
+- Fungsi `handleEditAnggotaInKK` di `Warga.js` dimodifikasi untuk menerima objek `anggota` dan `kkIdContext`, lalu membuka modal edit anggota (`EditAnggotaFormModal`).
+- State `isEditAnggotaModalOpen`, `editingAnggotaData`, dan `currentKkIdContextForEdit` ditambahkan dan dikelola di `Warga.js`.
+- File `client/src/components/kartuKeluarga/EditAnggotaFormModal.js` yang sudah ada, diperiksa dan disesuaikan.
+- Nama properti dalam `useEffect` di `EditAnggotaFormModal.js` disesuaikan untuk sinkronisasi dengan data `anggotaData` yang diterima dari `Warga.js` (misalnya, `anggotaData.nama` menjadi `anggotaData.namaLengkap`).
+- **File yang dimodifikasi**:
+  - `client/src/components/kartuKeluarga/DetailKeluargaModal.js`
+  - `client/src/pages/Warga.js`
+  - `client/src/components/kartuKeluarga/EditAnggotaFormModal.js`
+- Build sisi client (`cd client && npm run build`) berhasil dengan beberapa warning ESLint yang sudah ada sebelumnya.
+
+### [2024-07-24] - Analisis dan Penyempurnaan Fitur Filter & Ekspor Modul Warga
+- **Analisis Kode Komprehensif:**
+  - Melakukan review kode pada `Dev_log.txt`, `client/src/pages/Warga.js`, `client/src/components/warga/WargaFilterComponent.js`, `client/src/services/api.js`, dan `server/controllers/wargaController.js`.
+  - Ditemukan bahwa fungsionalitas dasar untuk filter lanjutan (termasuk NIK/Nama, Agama, JK, Status Kawin, Pekerjaan, Pendidikan Terakhir, Usia, Kepala Keluarga) dan ekspor data (CSV, PDF dengan pemilihan kolom) sudah ada di frontend dan backend.
+- **Penyempurnaan Frontend:**
+  - Memodifikasi `client/src/components/warga/WargaFilterComponent.js`:
+    - Menambahkan UI input filter untuk field "Pendidikan Terakhir" agar konsisten dengan kapabilitas backend dan `initialFilterParams` di `Warga.js`.
+    - Menghapus definisi komponen `ColumnSelectorModal` yang duplikat dan tidak terpakai (versi yang benar sudah diimpor dari `components/modals/`).
+  - Build sisi client (`npm run build --prefix client`) berhasil setelah modifikasi dengan hanya warning ESLint yang sudah ada sebelumnya.
+- **Verifikasi Backend dan Dependensi:**
+  - `server/controllers/wargaController.js` sudah memiliki logika untuk menangani filter `pendidikanTerakhir` dan parameter `columns` untuk ekspor.
+  - Fungsi `formatWargaForExport` sudah menyertakan `pendidikanTerakhir`.
+  - Library `json2csv` dan `pdfmake` sudah digunakan untuk ekspor.
+  - Keberadaan file font Roboto (`Roboto-Regular.ttf`, `Roboto-Medium.ttf`, dll.) yang diperlukan oleh `pdfmake` telah diverifikasi di `public/fonts/`.
+- **Status Fitur:**
+  - Filter lanjutan warga dan fitur ekspor (CSV/PDF) kini siap untuk pengujian fungsional yang lebih mendalam.
+- **File yang dimodifikasi:**
+  - `client/src/components/warga/WargaFilterComponent.js`
+- **Rekomendasi Selanjutnya:**
+  - Pengujian komprehensif fitur filter dan ekspor.
+  - Pertimbangkan untuk mengubah input "Pendidikan Terakhir" menjadi dropdown jika ada opsi standar.
+
+### [2024-07-25] - Konversi Filter Pendidikan Terakhir ke Dropdown
+- **Perubahan Frontend (Filter Warga):**
+  - Memodifikasi `client/src/components/warga/WargaFilterComponent.js`:
+    - Mengubah input field untuk filter "Pendidikan Terakhir" dari tipe `text` menjadi `select` (dropdown).
+    - Menambahkan `pendidikanTerakhirOptions` yang berisi daftar standar jenjang pendidikan (Tidak Sekolah, Tamat SD, SMP, SMA, Diploma, S1, S2, S3, Lainnya).
+    - Opsi "Semua Pendidikan" ditambahkan sebagai nilai default untuk dropdown.
+  - Tujuan perubahan ini adalah untuk meningkatkan konsistensi data input untuk filter pendidikan.
+- **Build Status:**
+  - Build sisi client (`npm run build --prefix client`) berhasil setelah modifikasi, dengan hanya warning ESLint yang sudah ada sebelumnya.
+- **File yang dimodifikasi:**
+  - `client/src/components/warga/WargaFilterComponent.js`
+
+### [2024-07-25] - Implementasi Validasi Komprehensif pada Form Kartu Keluarga
+- Penambahan fungsi validasi pada form Kartu Keluarga:
+  - Validasi NIK (16 digit angka) pada form Kepala Keluarga dan Anggota Keluarga
+  - Validasi Nomor KK (16 digit angka) pada form data KK
+  - Validasi nama (minimal 3 karakter, maksimal 100 karakter, format yang valid)
+  - Validasi tempat lahir (minimal 3 karakter, maksimal 50 karakter)
+  - Validasi tanggal lahir (tidak boleh di masa depan, maksimal 120 tahun)
+  - Validasi alamat (minimal 5 karakter, maksimal 255 karakter)
+  - Validasi RT/RW (format angka 1-3 digit)
+  - Validasi kode pos (format 5 digit angka)
+  - Validasi status hubungan (harus sesuai dengan opsi yang tersedia)
+- Penerapan validasi pada backend (double check):
+  - Validasi semua field penting di `kartuKeluargaController.js` untuk `createKartuKeluarga` dan `addAnggotaKeluarga`
+  - Validasi field di `wargaController.js` untuk `createWarga`
+- Perbaikan UX di frontend:
+  - Tampilan pesan error yang jelas pada setiap field yang tidak valid
+  - Pengecekan sebelum pindah langkah pada form multi-step
+  - Pengecekan sebelum submit form
+- **File yang dimodifikasi**:
+  - `client/src/components/kartuKeluarga/CreateKKForm.js` (Implementasi validasi form pembuatan KK)
+  - `client/src/components/kartuKeluarga/AddAnggotaForm.js` (Implementasi validasi form tambah anggota)
+  - `server/controllers/kartuKeluargaController.js` (Validasi input di backend untuk KK)
+  - `server/controllers/wargaController.js` (Validasi input di backend untuk Warga)
+- Build sukses tanpa error
+
+### [2024-07-26] - Peningkatan UI/UX Form Pembuatan KK (Step 3)
+- **Tujuan**: Meningkatkan kejelasan dan pengalaman pengguna pada Step 3 (Tambah Anggota Keluarga) di form pembuatan Kartu Keluarga baru (`CreateKKForm.js`).
+- **Perubahan Frontend (`client/src/components/kartuKeluarga/CreateKKForm.js`):**
+  - **Peningkatan Tampilan Step 3:**
+    - Menampilkan ringkasan (summary) data Kepala Keluarga yang telah diinput pada Step 2 di bagian atas Step 3 untuk memberikan konteks kepada pengguna.
+    - Menampilkan daftar anggota keluarga yang sudah berhasil ditambahkan (dari state `anggotaKeluarga`) secara dinamis. Setiap anggota dalam daftar ini dilengkapi dengan nama, NIK, status hubungan, dan tombol "Hapus" untuk memungkinkan koreksi sebelum KK disimpan.
+    - Fungsi `handleHapusAnggotaDariDaftar` ditambahkan untuk menangani penghapusan anggota dari daftar sementara ini.
+  - **Alur Penambahan Anggota Baru yang Lebih Terkontrol:**
+    - Form input detail untuk anggota keluarga baru (`currentAnggota`) kini disembunyikan secara default saat pengguna pertama kali masuk ke Step 3.
+    - Ditambahkan tombol baru "Tambah Anggota Keluarga Baru". Mengklik tombol ini akan menampilkan form input anggota.
+    - State baru `showAnggotaForm` (boolean) ditambahkan untuk mengontrol visibilitas form input anggota ini.
+    - State `showAnggotaForm` direset ke `false` saat pengguna bernavigasi antar step (maju atau mundur) untuk memastikan form tersembunyi secara default saat Step 3 pertama kali ditampilkan.
+    - Tombol "Tambah Anggota Ini ke Daftar" (yang memanggil `handleTambahAnggota`) tetap berfungsi seperti sebelumnya di dalam form yang muncul, dan form akan tetap terlihat setelah anggota ditambahkan untuk input berurutan.
+  - **Tombol Simpan KK Informatif:** Tombol "Simpan Kartu Keluarga" di akhir Step 3 kini menampilkan teks yang lebih dinamis, mengindikasikan apakah akan menyimpan KK hanya dengan Kepala Keluarga atau dengan sejumlah anggota yang telah ditambahkan (misalnya, "Simpan Kartu Keluarga (+ 2 Anggota)").
+  - **Perbaikan Styling & Aksesibilitas Minor:** Penyesuaian kelas Tailwind CSS untuk meningkatkan tampilan dan penambahan `id` unik pada beberapa elemen form.
+  - **Penyesuaian Logika Validasi `handleSubmit`**: Validasi untuk `currentAnggota` yang datanya belum ditambahkan ke daftar `anggotaKeluarga` disesuaikan agar tidak menghalangi submit jika pengguna memang tidak ingin menambahkan data tersebut (form akan diabaikan jika tidak di-submit melalui "Tambah Anggota Ini ke Daftar").
+- **File yang dimodifikasi**:
+  - `client/src/components/kartuKeluarga/CreateKKForm.js`
+- **Build Status**: Build sisi client (`npm run build --prefix client`) berhasil tanpa error baru (hanya warning ESLint yang sudah ada sebelumnya).
+
+### [2024-07-26] - Penambahan Tombol Batal pada Form Input Anggota KK
+- **Tujuan**: Memberikan opsi kepada pengguna untuk membatalkan penambahan anggota baru saat form input anggota sedang terbuka di Step 3 pada `CreateKKForm.js`.
+- **Perubahan Frontend (`client/src/components/kartuKeluarga/CreateKKForm.js`):**
+  - Ditambahkan tombol "Batal" di dalam form input untuk anggota baru (yang muncul ketika `showAnggotaForm` true).
+  - Tombol "Batal" ini diletakkan di samping tombol "Tambah Anggota Ini ke Daftar".
+  - **Fungsionalitas Tombol Batal**: Saat diklik, tombol ini akan:
+    1. Mengosongkan semua field input pada form anggota baru (mereset state `currentAnggota`).
+    2. Menghapus semua pesan error validasi yang mungkin terkait dengan form anggota baru (mereset state `errors`).
+    3. Menyembunyikan kembali form input anggota baru (menyetel `showAnggotaForm` ke `false`).
+- **File yang dimodifikasi**:
+  - `client/src/components/kartuKeluarga/CreateKKForm.js`.
+- **Build Status**: Build sisi client (`npm run build --prefix client`) berhasil tanpa error baru (hanya warning ESLint yang sudah ada sebelumnya).
+
+### [2025-05-10] - Perbaikan Mayor Inisialisasi Prisma Client dan Struktur Dependensi
+- **Masalah yang Diidentifikasi**:
+  - Error runtime `P2021: The table main.Warga (atau main.KartuKeluarga) does not exist`.
+  - Error runtime `TypeError: pool.query is not a function` di `wargaController.js`.
+  - Error runtime `TypeError: Cannot read properties of undefined (reading 'groupBy')` di `iuranController.js`.
+  - Log runtime menunjukkan Prisma mencoba menggunakan `sqlite pool` padahal koneksi dikonfigurasi untuk PostgreSQL.
+  - Error runtime `@prisma/client did not initialize yet` setelah upaya perbaikan awal.
+- **Analisis Penyebab**:
+  - `server/models/prisma.js` salah menginisialisasi `pg.Pool` manual bukannya `PrismaClient`.
+  - Controller (`wargaController.js`) masih mencoba menggunakan sintaks `pg.Pool` (`pool.query()`) setelah `server/models/prisma.js` diubah untuk mengekspor `PrismaClient` (yang diimpor sebagai `pool`).
+  - `kartuKeluargaController.js` menginisialisasi instance `PrismaClient` lokalnya sendiri, bukannya menggunakan instance bersama.
+  - Masalah `sqlite pool` dan `P2021` yang persisten kemungkinan disebabkan oleh cara `prisma generate` dieksekusi dan bagaimana `@prisma/client` di-resolve dalam struktur monorepo dengan `node_modules` di beberapa level. Dependensi `@prisma/client` dan `prisma` (CLI) ada di `server/package.json`, menyebabkan `server/models/prisma.js` me-resolve ke `@prisma/client` yang salah (belum di-generate) di `server/node_modules/` sementara `prisma generate` (dijalankan dari `server/`) menghasilkan output ke `ROOT/node_modules/.prisma/client`.
+  - Konflik pada script `npm run install-all` dan `postinstall` di root `package.json` yang menyebabkan `prisma:generate` gagal.
+- **Langkah Perbaikan Utama**:
+  - Mengubah `server/models/prisma.js` untuk menginisialisasi dan mengekspor `PrismaClient` dengan benar.
+  - Merefaktorisasi `server/controllers/wargaController.js` (fungsi `getAllWarga`) untuk menggunakan sintaks `PrismaClient`.
+  - Mengubah `server/controllers/kartuKeluargaController.js` untuk menggunakan instance `PrismaClient` bersama dari `server/models/prisma.js`.
+  - Memastikan `server/controllers/iuranController.js` sudah menggunakan instance `PrismaClient` bersama dengan benar.
+  - Menghapus dependensi `@prisma/client` dan `prisma` dari `server/package.json`.
+  - Menghapus script `postinstall` dari `server/package.json`.
+  - Menambahkan dependensi `@prisma/client` dan `prisma` (CLI) ke `package.json` root.
+  - Menambahkan script `prisma:generate` di `package.json` root (`prisma generate --schema ./prisma/schema.prisma`).
+  - Mengubah script `install-all` di `package.json` root untuk menjalankan `npm run prisma:generate` di akhir, setelah semua instalasi (root, server, client) selesai.
+  - Menghapus script `postinstall` dari `package.json` root untuk menghindari konflik dengan `install-all`.
+  - Melakukan instalasi ulang penuh (`node_modules` dihapus) untuk menerapkan struktur dependensi dan proses build yang baru.
+- **Hasil**:
+  - Aplikasi (server dan client) berhasil dijalankan tanpa error runtime terkait Prisma atau koneksi database yang dilaporkan sebelumnya.
+  - Prisma Client sekarang diinisialisasi dengan benar dan menggunakan driver PostgreSQL sesuai konfigurasi.
+- **File yang dimodifikasi**:
+  - `server/models/prisma.js`
+  - `server/controllers/wargaController.js`
+  - `server/controllers/kartuKeluargaController.js`
+  - `server/package.json`
+  - `package.json` (root)
+
+### [TANGGAL_HARI_INI] - Perbaikan Alur Pembuatan Kartu Keluarga
+- **Masalah:** Terjadi error "Gagal menyimpan data: Terjadi kesalahan saat membuat kartu keluarga" saat menyimpan Kartu Keluarga baru tanpa anggota tambahan.
+- **Analisis:**
+  - Log frontend menunjukkan bahwa pembuatan Warga untuk Kepala Keluarga (via `wargaService.createWarga`) berhasil.
+  - Pembuatan Kartu Keluarga (via `kartuKeluargaService.createKartuKeluarga` yang memanggil `exports.createKartuKeluarga` di server) juga berhasil. Fungsi `exports.createKartuKeluarga` di server secara otomatis sudah membuat relasi `KeluargaWarga` untuk Kepala Keluarga yang baru.
+  - Error (HTTP 400 Bad Request) terjadi pada panggilan frontend berikutnya ke `kartuKeluargaService.addAnggotaKeluarga` yang bertujuan untuk menautkan Kepala Keluarga yang sama ke KK yang sama.
+  - Fungsi `exports.addAnggotaKeluarga` di server menolak permintaan ini karena KK tersebut sudah memiliki Kepala Keluarga (yang baru saja dibuat oleh `exports.createKartuKeluarga`).
+- **Solusi:** Menghapus/mengomentari panggilan `kartuKeluargaService.addAnggotaKeluarga` yang redundan dari `client/src/components/kartuKeluarga/CreateKKForm.js` ketika membuat KK baru, karena penautan Kepala Keluarga awal sudah ditangani oleh server saat `createKartuKeluarga`.
+- **File yang dimodifikasi**:
+  - `client/src/components/kartuKeluarga/CreateKKForm.js` (menghapus panggilan API redundan)
+- Build frontend berhasil setelah perbaikan.
+
+### [TANGGAL_HARI_INI_NEXT] - Pengurangan Verbosity Log Prisma Server
+- **Masalah:** Log query Prisma pada sisi server terlalu detail dan memenuhi konsol.
+- **Solusi:** Mengubah konfigurasi instance `PrismaClient` di `server/models/prisma.js` untuk tidak lagi mencetak log dengan level `query` ke `stdout`. Log level `info`, `warn`, dan `error` tetap dipertahankan.
+- **File yang dimodifikasi**:
+  - `server/models/prisma.js` (menyesuaikan opsi `log` pada konstruktor `PrismaClient`)
+- **Catatan:** Perlu restart server backend agar perubahan diterapkan.
+
+### [TANGGAL_HARI_INI_YET_ANOTHER] - Penghilangan Log Kustom di Warga Controller
+- **Masalah:** Terdapat log kustom informatif di `wargaController.js` pada fungsi `getAllWarga` yang tidak lagi diperlukan untuk produksi.
+- **Solusi:** Mengomentari pernyataan `console.log` yang mencetak status pengambilan data warga di `server/controllers/wargaController.js`.
+- **File yang dimodifikasi**:
+  - `server/controllers/wargaController.js`
+- **Catatan:** Perlu restart server backend agar perubahan diterapkan.
+
+### [TANGGAL_HARI_INI_NEXT] - Perbaikan UX pada Fitur Kartu Keluarga
+- **Masalah:** User perlu menekan tombol refresh secara manual di sidebar setelah menambah atau menghapus Kartu Keluarga untuk melihat perubahan.
+- **Solusi:** Memodifikasi fungsi handler di `client/src/pages/Warga.js` agar otomatis melakukan refresh data setelah operasi CRUD.
+  - Mengubah `handleRegistrasiSuccess` untuk memanggil `fetchKartuKeluarga()` setelah berhasil menambah Kartu Keluarga baru.
+  - Mengubah `executeActualDeleteKK` untuk memanggil `fetchKartuKeluarga()` setelah berhasil menghapus Kartu Keluarga.
+  - Mengubah `executeActualDeleteAnggota` untuk memanggil `fetchKartuKeluarga()` setelah berhasil menghapus anggota Kartu Keluarga.
+  - Menghapus fungsi `handleDataChangeInPanel` yang redundan.
+- **File yang dimodifikasi**:
+  - `client/src/pages/Warga.js`
+- **Perubahan Perilaku:** Sekarang perubahan data (tambah/hapus KK dan anggota) langsung terlihat di sidebar tanpa perlu menekan tombol refresh manual."
+
+### [TANGGAL_HARI_INI_NEXT_UPDATE] - Perbaikan Caching Data Kartu Keluarga
+- **Masalah:** Masih terdapat masalah di mana perubahan data (tambah/hapus KK) tidak selalu terlihat di sidebar tanpa menekan tombol refresh secara manual, yang menunjukkan adanya masalah caching.
+- **Solusi:** 
+  - Memodifikasi fungsi `getKartuKeluargaWithKepala` dan `getAllKartuKeluarga` di `client/src/services/api.js` untuk menambahkan parameter `nocache` dengan timestamp unik untuk setiap request.
+  - Parameter ini memastikan browser tidak melakukan cache terhadap request dan selalu mendapatkan data terbaru dari server.
+  - Memodifikasi komponen `WargaSidebar` untuk menerima data kartu keluarga langsung dari parent component sebagai props, sehingga data akan otomatis diperbarui saat state di parent berubah.
+- **File yang dimodifikasi**:
+  - `client/src/services/api.js`
+  - `client/src/components/warga/WargaSidebar.js`
+- **Perubahan Perilaku:** Sidebar kartu keluarga kini selalu menampilkan data terbaru setelah ada operasi tambah/hapus/edit tanpa perlu menekan tombol refresh manual.
