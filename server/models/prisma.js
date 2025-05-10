@@ -1,6 +1,9 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 // const { Pool } = require('pg'); // Hapus atau komentari pg Pool
-const { PrismaClient } = require('@prisma/client');
+
+// Menggunakan helper untuk memuat Prisma Client dengan lebih fleksibel
+// Ini akan mencoba node_modules lokal terlebih dahulu, lalu node_modules root jika gagal
+const { PrismaClient } = require('../prisma-client-helper');
 
 // Log the DATABASE_URL that will be used by Prisma
 // Prisma secara otomatis akan membaca DATABASE_URL dari process.env atau .env
