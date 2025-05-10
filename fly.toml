@@ -1,0 +1,95 @@
+# fly.toml file generated for SuperAppsRTWeb
+#
+# Dokumentasi lebih lanjut di: https://fly.io/docs/reference/configuration/
+#
+# Beri nama aplikasi Anda di sini. Nama ini harus unik secara global.
+app = "superappsrtweb-backend" # Ganti dengan nama aplikasi unik Anda di Fly.io
+
+# Direktori utama tempat build akan dilakukan relatif terhadap root proyek Anda.
+# Karena backend Anda ada di folder 'server/', kita akan mengaturnya di sini
+# atau memastikan Dockerfile/builder tahu cara menanganinya.
+# Untuk buildpack Node.js Fly.io, seringkali ia cerdas jika package.json ada.
+# Jika Anda menggunakan Dockerfile kustom, sesuaikan 'dockerfile' dan 'build.image'.
+
+# Pilih region utama untuk deploy aplikasi Anda.
+# Gunakan 'fly platform regions' untuk melihat daftar region yang tersedia.
+primary_region = "sin" # Contoh: Singapura. Pilih yang terdekat dengan pengguna Anda.
+
+# Konfigurasi build. Fly.io akan mencoba mendeteksi aplikasi Node.js secara otomatis.
+# Jika Anda memiliki Dockerfile di 'server/', Anda bisa menentukannya di sini.
+[build]
+  # Jika Anda tidak memiliki Dockerfile, Fly.io akan menggunakan buildpacks.
+  # builder = "flyio/pack" # Ini adalah default dan biasanya tidak perlu diset eksplisit
+  # Jika kode backend Anda ada di dalam subdirektori (misal 'server/'),
+  # dan Anda ingin buildpack bekerja dari direktori tersebut,
+  # Anda mungkin perlu Dockerfile atau menyesuaikan strategi build.
+  # Namun, seringkali Fly.io buildpack dapat menangani ini jika 'package.json' ada di 'server/'.
+  # Cara paling mudah adalah memastikan konteks build adalah folder 'server'.
+  # Jika 'fly deploy' dijalankan dari root, Anda mungkin perlu 'fly deploy -c server/fly.toml'
+  # atau struktur 'fly.toml' yang mereferensikan Dockerfile yang ada di 'server/'
+  # atau Dockerfile di root yang menyalin folder 'server/'.
+
+  # Untuk proyek Node.js di subfolder 'server/' tanpa Dockerfile khusus,
+  # cara paling umum adalah menjalankan 'fly launch' dari DALAM folder 'server/',
+  # atau jika 'fly.toml' ada di root, Anda mungkin perlu Dockerfile.
+  # Mari asumsikan kita akan menggunakan buildpack dan perlu memastikan konteksnya benar.
+  # Fly.io biasanya pintar soal ini.
+
+[http_service]
+  internal_port = 8080 # Port tempat aplikasi Express.js Anda listen (biasanya dari process.env.PORT)
+  force_https = true
+  auto_stop_machines = true # Otomatis matikan mesin jika tidak ada traffic untuk menghemat biaya (cocok untuk free tier)
+  auto_start_machines = true # Otomatis nyalakan mesin saat ada traffic
+  min_machines_running = 0 # Set ke 0 untuk free tier agar bisa mati total
+  processes = ["app"] # Cocokkan dengan proses di bawah
+
+# Daftar proses yang ingin dijalankan. Untuk aplikasi web sederhana, biasanya hanya "app".
+[processes]
+  app = "npm run start --prefix server" # Perintah untuk menjalankan aplikasi Anda
+                                        # '--prefix server' menjalankan npm script dari folder 'server'
+                                        # Ini akan menjalankan "node index.js" dari 'server/package.json'
+
+# Variabel lingkungan untuk aplikasi Anda.
+# Anda akan perlu menambahkan DATABASE_URL setelah membuat database PostgreSQL di Fly.io.
+# Contoh:
+# [env]
+#   PORT = "8080" # Fly.io akan inject PORT, tapi baik untuk konsistensi
+#   DATABASE_URL = "postgres://user:pass@host:port/dbname" # Akan didapatkan dari Fly.io
+#   NODE_ENV = "production"
+
+#   # Jika Anda menggunakan Prisma, Anda mungkin memerlukan ini untuk migrasi saat deploy
+# [deploy]
+#   release_command = "npm run prisma:deploy --prefix server" # Ganti 'prisma:deploy' dengan skrip migrasi Anda di server/package.json
+#                                                             # Contoh skrip 'prisma:deploy': "prisma migrate deploy"
+
+# Health checks untuk memastikan aplikasi Anda berjalan dengan baik.
+# [[services]]
+#   protocol = "tcp"
+#   internal_port = 8080 # Port yang sama dengan internal_port di http_service
+#   processes = ["app"] # Cocokkan dengan proses di atas
+
+#   [[services.http_checks]]
+#     path = "/health" # Buat endpoint HTTP GET /health di aplikasi Express Anda yang mengembalikan status 200 OK
+#     interval = "10s"
+#     timeout = "2s"
+#     grace_period = "5s"
+
+
+# Catatan penting untuk struktur proyek Anda:
+# Karena kode backend Anda ada di dalam folder 'server/', ada beberapa cara Fly.io menanganinya:
+# 1. Menjalankan `fly launch` dari DALAM folder `server/`. Ini akan membuat `fly.toml` di `server/`.
+# 2. Jika `fly.toml` ada di root (seperti yang kita buat ini), perintah `[processes]` di atas
+#    menggunakan `npm run start --prefix server` untuk memberi tahu npm agar menjalankan skrip
+#    dari `package.json` yang ada di `server/`. Ini adalah pendekatan yang cukup umum.
+# 3. Menggunakan Dockerfile: Anda bisa membuat `Dockerfile` di root atau di `server/` dan
+#    mereferensikannya di `fly.toml`. Ini memberikan kontrol paling penuh.
+#
+# Untuk file `fly.toml` ini, kita menggunakan pendekatan #2.
+
+# Anda mungkin perlu menambahkan skrip migrasi Prisma ke `server/package.json` jika belum ada,
+# misalnya:
+# "scripts": {
+#   ...
+#   "prisma:deploy": "prisma migrate deploy"
+# }
+# Kemudian uncomment bagian `[deploy]` di atas. 
