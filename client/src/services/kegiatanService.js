@@ -1,12 +1,13 @@
-import axios from 'axios';
+import api from './api'; // Asumsikan api.js ada di direktori yang sama atau sesuaikan path
 
-// Gunakan variabel lingkungan untuk API_URL, dengan fallback ke localhost untuk development
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Hapus definisi API_URL lokal karena kita akan menggunakan baseURL dari instance api
+// const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Get semua kegiatan
 export const getAllKegiatan = async () => {
   try {
-    const response = await axios.get(`${API_URL}/kegiatan`);
+    // Gunakan instance 'api' yang sudah dikonfigurasi
+    const response = await api.get('/kegiatan');
     return response.data;
   } catch (error) {
     console.error('Error fetching kegiatan:', error);
@@ -17,7 +18,8 @@ export const getAllKegiatan = async () => {
 // Get detail kegiatan berdasarkan ID
 export const getKegiatanById = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}/${id}`);
+    // Gunakan instance 'api'
+    const response = await api.get(`/kegiatan/${id}`); // Path sudah relatif terhadap baseURL di 'api'
     return response.data;
   } catch (error) {
     console.error(`Error fetching kegiatan id ${id}:`, error);
@@ -28,7 +30,8 @@ export const getKegiatanById = async (id) => {
 // Create kegiatan baru
 export const createKegiatan = async (kegiatanData) => {
   try {
-    const response = await axios.post(API_URL, kegiatanData);
+    // Gunakan instance 'api'
+    const response = await api.post('/kegiatan', kegiatanData); // Path sudah relatif
     return response.data;
   } catch (error) {
     console.error('Error creating kegiatan:', error);
@@ -39,7 +42,8 @@ export const createKegiatan = async (kegiatanData) => {
 // Update kegiatan
 export const updateKegiatan = async (id, kegiatanData) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, kegiatanData);
+    // Gunakan instance 'api'
+    const response = await api.put(`/kegiatan/${id}`, kegiatanData); // Path sudah relatif
     return response.data;
   } catch (error) {
     console.error(`Error updating kegiatan id ${id}:`, error);
@@ -50,7 +54,8 @@ export const updateKegiatan = async (id, kegiatanData) => {
 // Delete kegiatan
 export const deleteKegiatan = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/${id}`);
+    // Gunakan instance 'api'
+    const response = await api.delete(`/kegiatan/${id}`); // Path sudah relatif
     return response.data;
   } catch (error) {
     console.error(`Error deleting kegiatan id ${id}:`, error);
@@ -61,7 +66,8 @@ export const deleteKegiatan = async (id) => {
 // Tambah peserta ke kegiatan
 export const addPesertaKegiatan = async (pesertaData) => {
   try {
-    const response = await axios.post(`${API_URL}/peserta`, pesertaData);
+    // Gunakan instance 'api'
+    const response = await api.post('/kegiatan/peserta', pesertaData); // Path sudah relatif
     return response.data;
   } catch (error) {
     console.error('Error adding peserta:', error);
@@ -72,7 +78,8 @@ export const addPesertaKegiatan = async (pesertaData) => {
 // Update status kehadiran peserta
 export const updateStatusKehadiran = async (id, statusData) => {
   try {
-    const response = await axios.put(`${API_URL}/peserta/${id}`, statusData);
+    // Gunakan instance 'api'
+    const response = await api.put(`/kegiatan/peserta/${id}`, statusData); // Path sudah relatif
     return response.data;
   } catch (error) {
     console.error(`Error updating peserta status id ${id}:`, error);
@@ -83,7 +90,8 @@ export const updateStatusKehadiran = async (id, statusData) => {
 // Hapus peserta dari kegiatan
 export const removePesertaKegiatan = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/peserta/${id}`);
+    // Gunakan instance 'api'
+    const response = await api.delete(`/kegiatan/peserta/${id}`); // Path sudah relatif
     return response.data;
   } catch (error) {
     console.error(`Error removing peserta id ${id}:`, error);
