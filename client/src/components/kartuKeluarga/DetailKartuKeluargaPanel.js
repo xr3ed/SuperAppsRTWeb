@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaHome, FaUserCircle, FaEdit, FaTrash, FaUserPlus, FaMapMarkerAlt, FaIdCard, FaUsers, FaChevronDown, FaChevronUp, FaBirthdayCake, FaPhoneAlt, FaEnvelope, FaSyncAlt, FaBaby, FaChild, FaMale, FaFemale, FaSpinner, FaTimes, FaEye } from 'react-icons/fa';
 import { kartuKeluargaService } from '../../services/api';
 import DetailAnggotaModal from './DetailAnggotaModal';
+import useViewport from '../../hooks/useViewport';
 
 // Fungsi Helper untuk menghitung usia
 const calculateAge = (birthDateString) => {
@@ -32,6 +33,7 @@ const DetailKartuKeluargaPanel = ({
   const [expandedAnggota, setExpandedAnggota] = useState(null);
   const [isDetailAnggotaModalOpen, setIsDetailAnggotaModalOpen] = useState(false);
   const [selectedWargaForModal, setSelectedWargaForModal] = useState(null);
+  const { device } = useViewport();
 
   const fetchKartuKeluargaDetail = useCallback(async () => {
     if (!kkId) return;
@@ -179,22 +181,24 @@ const DetailKartuKeluargaPanel = ({
       animate="visible"
     >
       {/* Header Panel - sedikit berbeda dari modal */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <FaHome className="mr-3 text-primary-500 text-2xl" /> 
-          {kkData ? `Keluarga ${kkData.kepalaKeluarga}` : 'Detail Kartu Keluarga'}
+      <div className={`flex items-center justify-between border-b border-gray-200 bg-gray-50 ${device === 'mobile' ? 'px-3 py-3' : 'px-6 py-4'}`}>
+        <h2 className={`font-bold text-gray-800 flex items-center flex-grow min-w-0 ${device === 'mobile' ? 'text-base' : 'text-xl'}`}>
+          <FaHome className={`mr-2 text-primary-500 flex-shrink-0 ${device === 'mobile' ? 'text-xl' : 'text-2xl'}`} /> 
+          <span className="break-words">
+            {kkData ? `Keluarga ${kkData.kepalaKeluarga}` : 'Detail Kartu Keluarga'}
+          </span>
         </h2>
-        <div className="flex space-x-3 items-center">
+        <div className={`flex items-center flex-shrink-0 ${device === 'mobile' ? 'space-x-1 ml-2' : 'space-x-3'}`}>
           <button
             onClick={() => onEdit && onEdit(kkData.id)}
-            className="p-2.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors"
+            className={`text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors ${device === 'mobile' ? 'p-2' : 'p-2.5'}`}
             title="Edit Kartu Keluarga"
           >
             <FaEdit className="text-lg" />
           </button>
           <button
             onClick={() => onDelete && onDelete(kkData.id)}
-            className="p-2.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${device === 'mobile' ? 'p-2' : 'p-2.5'}`}
             title="Hapus Kartu Keluarga"
             disabled={isDeletingKK || isLoading}
           >
@@ -202,7 +206,7 @@ const DetailKartuKeluargaPanel = ({
           </button>
           <button
             onClick={handleRefresh}
-            className="p-2.5 text-primary-600 hover:text-primary-800 hover:bg-primary-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`text-primary-600 hover:text-primary-800 hover:bg-primary-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${device === 'mobile' ? 'p-2' : 'p-2.5'}`}
             title="Muat Ulang Data"
             disabled={isLoading}
           >
@@ -210,7 +214,7 @@ const DetailKartuKeluargaPanel = ({
           </button>
           <button
             onClick={onClose}
-            className="p-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-colors"
+            className={`text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-colors ${device === 'mobile' ? 'p-2' : 'p-2.5'}`}
             title="Tutup Panel"
           >
             <FaTimes className="text-lg" />
@@ -219,66 +223,99 @@ const DetailKartuKeluargaPanel = ({
       </div>
 
       {/* Content Panel */}
-      <div className="overflow-y-auto p-6 flex-1 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <div className={`overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 ${device === 'mobile' ? 'p-3 space-y-4' : 'p-6 space-y-6'}`}>
         {/* Data Kepala Keluarga */}
         <motion.div 
           variants={itemVariants}
           custom={0}
-          className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm"
+          className={`bg-white rounded-lg border border-gray-200 shadow-sm ${device === 'mobile' ? 'p-3' : 'p-5'}`}
         >
           <div className="flex items-start">
-            <div className="flex-shrink-0 mr-4">
-              <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center">
-                <FaUserCircle className="text-3xl text-primary-600" />
+            <div className={`flex-shrink-0 ${device === 'mobile' ? 'mr-2.5' : 'mr-4'}`}>
+              <div className={`rounded-full bg-primary-100 flex items-center justify-center ${device === 'mobile' ? 'w-10 h-10' : 'w-16 h-16'}`}>
+                <FaUserCircle className={`text-primary-600 ${device === 'mobile' ? 'text-2xl' : 'text-3xl'}`} />
               </div>
             </div>
             <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <h3 className="text-xl font-semibold text-gray-800">{kkData.kepalaKeluarga}</h3>
-                <span className="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
-                  Kepala Keluarga
-                </span>
+              <div className="flex justify-between items-center">
+                <div> 
+                  <h3 className={`font-semibold text-gray-800 ${device === 'mobile' ? 'text-base leading-tight' : 'text-xl'}`}>{kkData.kepalaKeluarga}</h3>
+                  {device === 'mobile' && (
+                    <span className={`text-2xs font-medium px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 mt-0.5 inline-block`}>
+                      Kepala Keluarga
+                    </span>
+                  )}
+                </div>
+                
+                {device === 'mobile' ? (
+                  <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
+                    <button
+                      onClick={() => handleShowDetailAnggota(kepalaKeluargaData)}
+                      className="text-gray-700 hover:text-primary-600 p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      title="Lihat Detail"
+                    >
+                      <FaEye className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => onEditAnggota && onEditAnggota(kepalaKeluargaData, kkData.id)}
+                      className="text-gray-700 hover:text-blue-600 p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      title="Edit Profil"
+                    >
+                      <FaEdit className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full bg-green-100 text-green-700`}>
+                    Kepala Keluarga
+                  </span>
+                )}
               </div>
-              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+              <div className={`mt-2 grid grid-cols-1 gap-x-4 gap-y-2 ${device === 'mobile' ? 'text-xs' : 'md:grid-cols-2 text-sm'}`}>
                 <div className="flex items-center">
-                  <FaIdCard className="text-gray-400 mr-2 text-sm" />
-                  <p className="text-sm text-gray-600">No. KK: <span className="font-medium text-gray-700">{kkData.nomorKK}</span></p>
+                  <FaIdCard className={`text-gray-400 mr-2 ${device === 'mobile' ? 'text-xs' : 'text-sm'}`} />
+                  <p className="text-gray-600">No. KK: <span className="font-medium text-gray-700">{kkData.nomorKK}</span></p>
                 </div>
                 <div className="flex items-center">
-                  <FaMapMarkerAlt className="text-gray-400 mr-2 text-sm" />
-                  <p className="text-sm text-gray-600">RT {kkData.rt}/RW {kkData.rw}</p>
+                  <FaMapMarkerAlt className={`text-gray-400 mr-2 ${device === 'mobile' ? 'text-xs' : 'text-sm'}`} />
+                  <p className="text-gray-600">RT {kkData.rt}/RW {kkData.rw}</p>
                 </div>
               </div>
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-700 mb-1">Alamat:</h4>
-                <p className="text-sm text-gray-600">{kkData.alamat}</p>
+              <div className={`mt-3 bg-gray-50 rounded-lg ${device === 'mobile' ? 'p-2.5 text-xs' : 'p-3 text-sm'}`}>
+                <h4 className={`font-medium text-gray-700 mb-1 ${device === 'mobile' ? 'text-xs' : 'text-sm'}`}>
+                    Alamat:
+                </h4>
+                <p className="text-gray-600">{kkData.alamat}</p>
                 {(kkData.kelurahan || kkData.kecamatan || kkData.kabupatenKota || kkData.provinsi) && (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-gray-600">
                     {kkData.kelurahan || ''}{kkData.kelurahan && kkData.kecamatan ? ', ' : ''}{kkData.kecamatan || ''}
                     {(kkData.kelurahan || kkData.kecamatan) && kkData.kabupatenKota ? ', ' : ''}{kkData.kabupatenKota || ''}
                     {(kkData.kelurahan || kkData.kecamatan || kkData.kabupatenKota) && kkData.provinsi ? ', ' : ''}{kkData.provinsi || ''}
                   </p>
                 )}
                 {kkData.kodePos && (
-                  <p className="text-sm text-gray-600">Kode Pos: {kkData.kodePos}</p>
+                  <p className="text-gray-600">Kode Pos: {kkData.kodePos}</p>
                 )}
               </div>
-              <div className="mt-4 flex space-x-3">
-                <button 
-                  onClick={() => handleShowDetailAnggota(kepalaKeluargaData)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <FaEye className="mr-1.5 h-4 w-4" />
-                  Lihat Detail
-                </button>
-                <button 
-                  onClick={() => onEditAnggota && onEditAnggota(kepalaKeluargaData, kkData.id)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <FaEdit className="mr-1.5 h-4 w-4" />
-                  Edit Profil
-                </button>
-              </div>
+              {device !== 'mobile' && (
+                <div className={`mt-4 w-full`}>
+                  <div className={`flex justify-center items-center space-x-3`}>
+                    <button
+                      onClick={() => handleShowDetailAnggota(kepalaKeluargaData)}
+                      className={`inline-flex items-center border border-gray-300 shadow-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 px-3 py-1.5 text-xs`}
+                    >
+                      <FaEye className={`mr-1.5 h-4 w-4`} />
+                      Lihat Detail
+                    </button>
+                    <button
+                      onClick={() => onEditAnggota && onEditAnggota(kepalaKeluargaData, kkData.id)}
+                      className={`inline-flex items-center border border-gray-300 shadow-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 px-3 py-1.5 text-xs`}
+                    >
+                      <FaEdit className={`mr-1.5 h-4 w-4`} />
+                      Edit Profil
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
@@ -287,38 +324,38 @@ const DetailKartuKeluargaPanel = ({
         <motion.div
           variants={itemVariants}
           custom={1} // Sesuaikan custom index jika perlu
-          className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm"
+          className={`bg-white rounded-lg border border-gray-200 shadow-sm ${device === 'mobile' ? 'p-3' : 'p-5'}`}
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-800 flex items-center">
-              <FaUsers className="mr-2 text-primary-500" /> 
+          <div className={`flex items-center justify-between ${device === 'mobile' ? 'mb-3' : 'mb-4'}`}>
+            <h3 className={`font-semibold text-gray-800 flex items-center ${device === 'mobile' ? 'text-base' : 'text-xl'}`}>
+              <FaUsers className={`mr-2 text-primary-500 ${device === 'mobile' ? 'text-lg' : ''}`} /> 
               Anggota Keluarga Lainnya
             </h3>
-            <span className="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-1 rounded-full">
+            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${device === 'mobile' ? 'bg-primary-50 text-primary-700 px-2 py-0.5' : 'bg-primary-100 text-primary-800'}`}>
               {otherAnggotaKeluarga.length} Anggota
             </span>
           </div>
 
           {otherAnggotaKeluarga.length > 0 ? (
-            <div className="space-y-3">
+            <div className={`${device === 'mobile' ? 'space-y-2.5' : 'space-y-3'}`}>
               {otherAnggotaKeluarga.map((anggota, index) => (
                 <motion.div
                   key={anggota.id}
                   variants={itemVariants}
                   custom={2 + (index * 0.1)} // Sesuaikan custom index jika perlu
-                  className={`rounded-lg border transition-all duration-200 ${expandedAnggota === anggota.id ? 'bg-primary-50 border-primary-200 shadow' : 'bg-gray-50 border-gray-200'}`}
+                  className={`rounded-lg border transition-all duration-200 ${expandedAnggota === anggota.id ? 'bg-primary-50 border-primary-200 shadow' : 'bg-gray-50 border-gray-200'} ${device === 'mobile' ? 'rounded-md' : ''}`}
                 >
                   <div 
-                    className="flex items-center justify-between p-3 cursor-pointer"
+                    className={`flex items-center justify-between cursor-pointer ${device === 'mobile' ? 'p-2.5' : 'p-3'}`}
                     onClick={() => toggleExpandAnggota(anggota.id)}
                   >
                     <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3 flex-shrink-0">
+                      <div className={`rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 ${device === 'mobile' ? 'w-8 h-8 mr-2' : 'w-10 h-10 mr-3'}`}>
                         {getIconForAnggota(anggota.warga)} 
                       </div>
                       <div>
-                        <p className="font-medium text-gray-800">{anggota.warga?.namaLengkap || 'Nama Tidak Tersedia'}</p>
-                        <p className="text-xs text-gray-500">{anggota.statusHubungan || 'Status Tidak Tersedia'}</p>
+                        <p className={`font-medium text-gray-800 ${device === 'mobile' ? 'text-sm' : ''}`}>{anggota.warga?.namaLengkap || 'Nama Tidak Tersedia'}</p>
+                        <p className={`text-gray-500 ${device === 'mobile' ? 'text-xs' : 'text-xs'}`}>{anggota.statusHubungan || 'Status Tidak Tersedia'}</p>
                       </div>
                     </div>
                     {expandedAnggota === anggota.id ? (
@@ -334,33 +371,33 @@ const DetailKartuKeluargaPanel = ({
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
-                        className="px-3 pb-3 pt-1 border-t border-gray-200 mt-2"
+                        className={`pb-3 pt-1 border-t border-gray-200 mt-2 ${device === 'mobile' ? 'px-2.5' : 'px-3'}`}
                       >
-                        <div className="text-xs text-gray-600 space-y-1">
+                        <div className={`text-gray-600 space-y-1 ${device === 'mobile' ? 'text-xs' : 'text-xs'}`}>
                           <p><FaIdCard className="inline mr-1.5 text-gray-400" />NIK: <span className="font-medium text-gray-700">{anggota.warga?.nik || '-'}</span></p>
                           <p><FaBirthdayCake className="inline mr-1.5 text-gray-400" />Tgl Lahir: <span className="font-medium text-gray-700">{formatDate(anggota.warga?.tanggalLahir)}</span></p>
                           <p><FaUserCircle className="inline mr-1.5 text-gray-400" />Jenis Kelamin: <span className="font-medium text-gray-700">{anggota.warga?.jenisKelamin || '-'}</span></p>
                           {anggota.warga?.nomorTelepon && <p><FaPhoneAlt className="inline mr-1.5 text-gray-400" />Telepon: <span className="font-medium text-gray-700">{anggota.warga.nomorTelepon}</span></p>}
                           {anggota.warga?.email && <p><FaEnvelope className="inline mr-1.5 text-gray-400" />Email: <span className="font-medium text-gray-700">{anggota.warga.email}</span></p>}
                         </div>
-                        <div className="mt-3 flex justify-end space-x-2">
+                        <div className={`mt-3 flex justify-end ${device === 'mobile' ? 'space-x-1.5' : 'space-x-2'}`}>
                           <button
                             onClick={() => handleShowDetailAnggota(anggota.warga) } 
-                            className="text-xs flex items-center text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded-md transition-colors"
+                            className={`text-xs flex items-center text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 rounded-md transition-colors ${device === 'mobile' ? 'px-1.5 py-0.5' : 'px-2 py-1'}`}
                             title="Lihat Detail Anggota"
                           >
                             <FaEye className="mr-1" /> Lihat
                           </button>
                           <button
                             onClick={() => onEditAnggota && onEditAnggota(anggota.warga, kkData.id)}
-                            className="text-xs flex items-center text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-md transition-colors"
+                            className={`text-xs flex items-center text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors ${device === 'mobile' ? 'px-1.5 py-0.5' : 'px-2 py-1'}`}
                             title="Edit Anggota"
                           >
                             <FaEdit className="mr-1"/> Edit
                           </button>
                           <button
                             onClick={() => onDeleteAnggota && onDeleteAnggota(anggota.id)}
-                            className="text-xs flex items-center text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={`text-xs flex items-center text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${device === 'mobile' ? 'px-1.5 py-0.5' : 'px-2 py-1'}`}
                             title="Hapus Anggota"
                             disabled={isDeletingAnggota || isLoading}
                           >
@@ -375,15 +412,15 @@ const DetailKartuKeluargaPanel = ({
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500 italic py-4">Belum ada anggota keluarga lainnya yang terdaftar.</p>
+            <p className={`text-center text-gray-500 italic ${device === 'mobile' ? 'py-3 text-sm' : 'py-4'}`}>Belum ada anggota keluarga lainnya yang terdaftar.</p>
           )}
-          <div className="mt-6 text-center">
+          <div className={`text-center ${device === 'mobile' ? 'mt-4' : 'mt-6'}`}>
             <button
               onClick={() => onAddAnggota && onAddAnggota(kkData.id)}
-              className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              className={`inline-flex items-center justify-center border border-transparent shadow-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors ${device === 'mobile' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'}`}
               title="Tambah Anggota ke Kartu Keluarga Ini"
             >
-              <FaUserPlus className="mr-2 -ml-1 h-5 w-5" />
+              <FaUserPlus className={`-ml-1 h-5 w-5 ${device === 'mobile' ? 'mr-1.5 h-4 w-4' : 'mr-2 h-5 w-5'}`} />
               Tambah Anggota
             </button>
           </div>

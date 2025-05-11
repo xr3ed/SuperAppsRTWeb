@@ -266,7 +266,9 @@
 - Pengujian awal tampilan mobile dan desktop menunjukkan fungsionalitas dasar (navigasi sidebar, header) berjalan sesuai rencana.
 
 ### [2024-07-19] - Penyesuaian WargaSidebar, Perbaikan FAB, Implementasi Speed Dial, Perbaikan DetailKartuKeluargaPanel, dan Scroll Into View untuk Item KK Aktif
-- **`WargaSidebar.js`**: Diintegrasikan dengan `useViewport` untuk penyesuaian styling di mobile (padding, font, ikon, penyembunyian tag RT/RW).
+- **`WargaSidebar.js`**: 
+    - Diintegrasikan dengan `useViewport` untuk penyesuaian styling awal di mobile (padding, font, ikon).
+    - **Informasi RT/RW dihapus sepenuhnya** dari tampilan daftar KK (baik mobile maupun desktop) sesuai permintaan pengguna untuk menyederhanakan tampilan.
 - **FAB `Warga.js`**:
     - Awalnya diubah menjadi `position: fixed` untuk mengatasi masalah ikut ter-scroll.
     - Kemudian diimplementasikan logika hide/show on scroll menggunakan `framer-motion` (dihapus karena membingungkan user).
@@ -278,6 +280,9 @@
     - Tombol "Tambah Anggota" dipindahkan dari detail Kepala Keluarga ke header bagian "Anggota Keluarga Lainnya".
     - Ikon aksi di header panel utama diperbesar, diberi padding, dan jarak antar tombol disesuaikan.
     - Styling tombol aksi individu Kepala Keluarga ("Lihat Detail", "Edit Profil") diubah menjadi tombol border standar yang lebih kecil.
+    - **Penyesuaian Responsif Tambahan**: Dilakukan penyesuaian lebih lanjut untuk tata letak dan ukuran elemen (padding, font, ikon, margin) di mode seluler menggunakan `useViewport` untuk memastikan tampilan yang lebih optimal di berbagai ukuran layar seluler.
+    - **Perbaikan Tata Letak Mobile Lanjutan**: Mengatasi masalah port yang bentrok (EADDRINUSE) dengan menghentikan proses yang ada menggunakan `npx kill-port`. Melakukan penyesuaian lebih lanjut pada header `DetailKartuKeluargaPanel.js` di mode mobile dengan mengatur `space-x` antar ikon, membuat judul (`<h2>`) menggunakan `flex-grow` dan `min-w-0` serta `break-words` pada span nama keluarga untuk penanganan teks panjang. Menambahkan `justify-center` pada kontainer tombol "Lihat Detail" dan "Edit Profil" agar terpusat di mobile.
+    - **Perbaikan Tombol Aksi Kepala Keluarga**: Menambahkan `w-full` ke `div` kontainer tombol "Lihat Detail" dan "Edit Profil" di `DetailKartuKeluargaPanel.js` untuk memastikan grup tombol tersebut rata tengah di tampilan seluler.
 - **`WargaSidebar.js` (Scroll Into View)**: Mengimplementasikan `scrollIntoView` untuk item KK yang aktif. Ketika sebuah KK dipilih, sidebar akan otomatis scroll untuk memastikan item tersebut sepenuhnya terlihat, terutama jika sebelumnya terpotong oleh panel detail.
     - Menggunakan `useRef` untuk menyimpan referensi ke elemen item KK.
     - Menggunakan `useEffect` untuk memantau perubahan `selectedKKId` dan memicu scroll.

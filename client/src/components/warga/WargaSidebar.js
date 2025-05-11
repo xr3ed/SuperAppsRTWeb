@@ -223,12 +223,6 @@ const WargaSidebar = ({ onSelectKK, selectedKKId, onEdit, onDelete, onAddNewKK, 
                       </div>
                     </div>
                   </div>
-                  <div className={`flex items-center ${device === 'mobile' ? 'hidden' : ''}`}>
-                    <span className={`text-xs px-2 py-1 rounded-full 
-                                      ${selectedKKId === kk.id ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-700'}`}>
-                      RT {kk.rt}/RW {kk.rw}
-                    </span>
-                  </div>
                 </div>
               </motion.div>
             ))}
