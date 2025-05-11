@@ -20,13 +20,14 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "6.7.0",
-    "prisma": "6.7.0",
-    "concurrently": "^8.2.2",
+    "concurrently": "^9.1.2",
     "pg": "^8.15.6",
+    "prisma": "6.7.0",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "electron": "^36.2.0",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "supabase": "^2.22.12"
   }
 }
