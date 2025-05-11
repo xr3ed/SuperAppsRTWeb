@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { FaUser, FaHome, FaPlus, FaSpinner, FaEye, FaTrash } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaUser, FaHome, FaPlus, FaSpinner, FaEye, FaTrash, FaIdCard, FaUserPlus } from 'react-icons/fa';
+import { FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { wargaService, kartuKeluargaService } from '../services/api';
 import WargaSidebar from '../components/warga/WargaSidebar';
@@ -87,6 +88,9 @@ const Warga = () => {
   // State untuk CV-like Modal
   const [isCvModalOpen, setIsCvModalOpen] = useState(false);
   const [selectedWargaForCvModal, setSelectedWargaForCvModal] = useState(null);
+
+  // State untuk Speed Dial FAB
+  const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
 
   // Fungsi fetchWarga dengan useCallback
   const fetchWarga = useCallback(async (currentFiltersToApply) => {
@@ -473,6 +477,42 @@ const Warga = () => {
 
   // Render function untuk tab Kartu Keluarga (tetap sama)
   const renderKKTab = () => {
+    const handleToggleSpeedDial = () => {
+      setIsSpeedDialOpen(!isSpeedDialOpen);
+    };
+
+    const handleAddNewKKFromSpeedDial = () => {
+      openModalForNewKK();
+      setIsSpeedDialOpen(false); // Tutup speed dial setelah aksi
+    };
+
+    const handleAddAnggotaFromSpeedDial = () => {
+      // TODO: Implementasi pemilihan KK target, lalu panggil:
+      // setKkIdForAddingAnggota(selectedKkId);
+      // setShowRegistrasiModal(true);
+      // setRegistrasiModalMode('addAnggotaExistingKK'); // Mode baru mungkin diperlukan di RegistrasiKeluargaModal
+      toast.info('Fitur Tambah Anggota dari Speed Dial akan diimplementasikan.');
+      setIsSpeedDialOpen(false); // Tutup speed dial setelah aksi
+    };
+
+    const speedDialItemVariants = {
+      hidden: { opacity: 0, y: 20, scale: 0.8 },
+      visible: (i) => ({
+        opacity: 1, y: 0, scale: 1,
+        transition: {
+          delay: i * 0.05, // Stagger delay
+          duration: 0.2,
+          ease: "easeOut"
+        }
+      }),
+      exit: { opacity: 0, y: 10, scale: 0.8, transition: { duration: 0.15 } }
+    };
+
+    const speedDialActions = [
+      { label: "Tambah Anggota Keluarga", icon: <FaUserPlus size={18} />, action: handleAddAnggotaFromSpeedDial, id: "addAnggota" },
+      { label: "Tambah Kartu Keluarga Baru", icon: <FaIdCard size={18} />, action: handleAddNewKKFromSpeedDial, id: "addKK" },
+    ];
+
     return (
         <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] relative">
         {/* Sidebar Kepala Keluarga */}
@@ -505,18 +545,76 @@ const Warga = () => {
               <FaHome className="text-6xl text-gray-400 mb-4" />
               <p className="text-xl text-gray-600">Pilih Kartu Keluarga</p>
               <p className="text-gray-500">Silakan pilih salah satu Kartu Keluarga dari daftar di samping untuk melihat detailnya.</p>
-              <p className="text-gray-500 mt-2">Atau <button onClick={() => openModalForNewKK()} className="text-indigo-600 hover:underline">buat Kartu Keluarga baru</button>.</p>
+              <p className="text-gray-500 mt-2">Atau buat Kartu Keluarga baru.</p>
             </div>
           )}
         </div>
-        {/* Floating Action Button untuk Tambah KK Baru */}
-        <button
-          onClick={() => openModalForNewKK()}
-          className="absolute bottom-8 right-8 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg transition-transform duration-150 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50"
-          title="Tambah Kartu Keluarga Baru"
-        >
-          <FaPlus size={24} />
-        </button>
+        {/* Floating Action Button untuk Tambah KK Baru - Selalu terlihat jika tab KK aktif */}
+        <AnimatePresence>
+          {activeTab === 'kk' && (
+            <motion.button
+              onClick={() => openModalForNewKK()}
+              className="fixed bottom-8 right-8 bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg transition-transform duration-150 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 z-30"
+              title="Tambah Kartu Keluarga Baru"
+              // Animasi muncul saat pertama kali tab aktif atau komponen mount
+              initial={{ opacity: 0, scale: 0.7, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              // exit tidak diperlukan jika tidak ada kondisi isFabVisible lagi
+              // exit={{ opacity: 0, scale: 0.7, y: 20 }}
+              transition={{ duration: 0.3, ease: "circOut" }} // Perhalus durasi
+            >
+              <FaPlus size={24} />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Speed Dial FAB Container - hanya aktif di tab KK */} 
+        {activeTab === 'kk' && (
+          <div className="fixed bottom-8 right-8 z-30 flex flex-col items-end">
+            {/* Tombol Sub-Menu Speed Dial */} 
+            <AnimatePresence>
+              {isSpeedDialOpen && (
+                speedDialActions.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    custom={index} // Untuk stagger delay
+                    variants={speedDialItemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="flex items-center mb-3"
+                  >
+                    <span className="mr-3 bg-gray-700 text-white text-xs font-medium px-3 py-1.5 rounded-md shadow-sm">
+                      {item.label}
+                    </span>
+                    <button
+                      onClick={item.action}
+                      className="bg-primary-500 hover:bg-primary-600 text-white p-3 rounded-full shadow-md transition-colors duration-150"
+                      title={item.label}
+                    >
+                      {item.icon}
+                    </button>
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
+
+            {/* Tombol FAB Utama */} 
+            <motion.button
+              onClick={handleToggleSpeedDial}
+              className={`bg-primary-600 hover:bg-primary-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 ${isSpeedDialOpen ? 'rotate-45' : ''}`}
+              title={isSpeedDialOpen ? "Tutup Opsi" : "Buka Opsi Tambah"}
+              whileHover={{ scale: 1.05 }}
+              // Animasi muncul awal tetap ada jika diinginkan, atau hapus jika digantikan interaksi speed dial
+              initial={{ opacity: 0, scale: 0.7 }} 
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, ease: "circOut" }}
+            >
+              <FaPlus size={24} className={`transition-transform duration-200 ${isSpeedDialOpen ? 'hidden' : 'block'}`} />
+              <FiX size={24} className={`transition-transform duration-200 ${isSpeedDialOpen ? 'block' : 'hidden'}`} />
+            </motion.button>
+          </div>
+        )}
       </div>
     );
   };

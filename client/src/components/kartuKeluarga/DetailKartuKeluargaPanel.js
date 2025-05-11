@@ -23,7 +23,7 @@ const calculateAge = (birthDateString) => {
 
 const DetailKartuKeluargaPanel = ({ 
   kkId, onEdit, onDelete, onAddAnggota, onEditAnggota, onDeleteAnggota, onRefresh,
-  isDeletingKK, isDeletingAnggota, onClosePanel,
+  isDeletingKK, isDeletingAnggota, onClose,
   refreshCounter
 }) => {
   const [kkData, setKkData] = useState(null);
@@ -181,45 +181,45 @@ const DetailKartuKeluargaPanel = ({
       {/* Header Panel - sedikit berbeda dari modal */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
         <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <FaHome className="mr-2 text-primary-500" /> 
+          <FaHome className="mr-3 text-primary-500 text-2xl" /> 
           {kkData ? `Keluarga ${kkData.kepalaKeluarga}` : 'Detail Kartu Keluarga'}
         </h2>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3 items-center">
           <button
             onClick={() => onEdit && onEdit(kkData.id)}
-            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
+            className="p-2.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors"
             title="Edit Kartu Keluarga"
           >
-            <FaEdit />
+            <FaEdit className="text-lg" />
           </button>
           <button
             onClick={() => onDelete && onDelete(kkData.id)}
-            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="Hapus Kartu Keluarga"
             disabled={isDeletingKK || isLoading}
           >
-            {isDeletingKK ? <FaSpinner className="animate-spin"/> : <FaTrash />}
+            {isDeletingKK ? <FaSpinner className="animate-spin text-lg"/> : <FaTrash className="text-lg"/>}
           </button>
           <button
             onClick={handleRefresh}
-            className="p-2 text-primary-600 hover:text-primary-800 hover:bg-primary-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2.5 text-primary-600 hover:text-primary-800 hover:bg-primary-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="Muat Ulang Data"
             disabled={isLoading}
           >
-            {isLoading ? <FaSpinner className="animate-spin"/> : <FaSyncAlt />}
+            {isLoading ? <FaSpinner className="animate-spin text-lg"/> : <FaSyncAlt className="text-lg"/>}
           </button>
           <button
-            onClick={onClosePanel}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+            onClick={onClose}
+            className="p-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-colors"
             title="Tutup Panel"
           >
-            <FaTimes />
+            <FaTimes className="text-lg" />
           </button>
         </div>
       </div>
 
       {/* Content Panel */}
-      <div className="overflow-y-auto p-6 flex-1 space-y-6">
+      <div className="overflow-y-auto p-6 flex-1 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {/* Data Kepala Keluarga */}
         <motion.div 
           variants={itemVariants}
@@ -263,34 +263,21 @@ const DetailKartuKeluargaPanel = ({
                   <p className="text-sm text-gray-600">Kode Pos: {kkData.kodePos}</p>
                 )}
               </div>
-              <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
-                <p className="text-sm font-medium text-gray-700">Status: <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Aktif</span></p>
-                <div className="flex space-x-2">
-                  {kepalaKeluargaData && (
-                    <>
-                      <button
-                        onClick={() => handleShowDetailAnggota(kepalaKeluargaData)}
-                        className="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-                        title="Lihat Detail Kepala Keluarga"
-                      >
-                        <FaEye className="mr-1.5" /> Lihat
-                      </button>
-                      <button
-                        onClick={() => onEditAnggota && onEditAnggota(kepalaKeluargaData, kkData.id)}
-                        className="flex items-center text-sm text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 px-3 py-1.5 rounded-lg transition-colors"
-                        title="Edit Data Kepala Keluarga"
-                      >
-                        <FaEdit className="mr-1.5" /> Edit
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => onAddAnggota && onAddAnggota(kkData.id)}
-                    className="flex items-center text-sm text-white bg-primary-500 hover:bg-primary-600 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    <FaUserPlus className="mr-1.5" /> Tambah Anggota
-                  </button>
-                </div>
+              <div className="mt-4 flex space-x-3">
+                <button 
+                  onClick={() => handleShowDetailAnggota(kepalaKeluargaData)}
+                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <FaEye className="mr-1.5 h-4 w-4" />
+                  Lihat Detail
+                </button>
+                <button 
+                  onClick={() => onEditAnggota && onEditAnggota(kepalaKeluargaData, kkData.id)}
+                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <FaEdit className="mr-1.5 h-4 w-4" />
+                  Edit Profil
+                </button>
               </div>
             </div>
           </div>
@@ -300,7 +287,7 @@ const DetailKartuKeluargaPanel = ({
         <motion.div
           variants={itemVariants}
           custom={1} // Sesuaikan custom index jika perlu
-          className="bg-white px-5 pt-5 pb-20 rounded-lg border border-gray-200 shadow-sm"
+          className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm"
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-gray-800 flex items-center">
@@ -390,6 +377,16 @@ const DetailKartuKeluargaPanel = ({
           ) : (
             <p className="text-center text-gray-500 italic py-4">Belum ada anggota keluarga lainnya yang terdaftar.</p>
           )}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => onAddAnggota && onAddAnggota(kkData.id)}
+              className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              title="Tambah Anggota ke Kartu Keluarga Ini"
+            >
+              <FaUserPlus className="mr-2 -ml-1 h-5 w-5" />
+              Tambah Anggota
+            </button>
+          </div>
         </motion.div>
       </div>
       {selectedWargaForModal && (

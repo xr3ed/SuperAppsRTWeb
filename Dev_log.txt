@@ -8,6 +8,9 @@
   📁 src/ (Kode sumber frontend)
     📁 components/ (Komponen-komponen React)
       📁 layout/ (Komponen layout seperti sidebar, header)
+        📄 Sidebar.js (Komponen sidebar navigasi utama, kini responsif)
+        📄 Header.js (Komponen header aplikasi, kini responsif dengan tombol menu mobile)
+        📄 Layout.js (Komponen layout utama yang mengatur Sidebar dan Header)
       📁 warga/ (Komponen terkait warga)
         📄 WargaSidebar.js (Komponen sidebar untuk menampilkan daftar Kepala Keluarga dengan fitur accordion)
         📄 WargaFilterComponent.js (Komponen UI untuk filter daftar warga individu)
@@ -22,6 +25,8 @@
         📄 DetailAnggotaModal.js (Modal CV-like untuk detail anggota)
       📁 modals/ (Komponen modal umum atau fitur spesifik)
         📄 ColumnSelectorModal.js (Modal untuk memilih kolom ekspor)
+    📁 hooks/ (Hook kustom React)
+      📄 useViewport.js (Hook untuk deteksi ukuran layar dan tipe perangkat)
     📁 pages/ (Halaman utama aplikasi)
       📄 Warga.js (Halaman terpadu untuk manajemen warga dan kartu keluarga)
     📁 services/ (Layanan API)
@@ -248,229 +253,32 @@
   - `client/src/pages/Warga.js` (penambahan struktur tab dan integrasi fungsionalitas Kartu Keluarga)
 - Build sukses dengan beberapa warning eslint minor terkait variabel yang tidak digunakan
 
-### [2024-07-20] - Perbaikan UI/UX dan Penanganan Error pada Modul Kartu Keluarga
-- Perbaikan UI/UX halaman Warga dengan menyempurnakan tampilan tab "Kartu Keluarga"
-- Implementasi mekanisme penanganan error yang lebih user-friendly dengan tombol "Coba Lagi"
-- Penambahan tombol refresh pada komponen-komponen utama (WargaSidebar, DetailKeluargaModal)
-- Standardisasi komponen error message dengan memanfaatkan kelas utilitas baru
-- Perbaikan indikator loading untuk memberikan feedback visual yang lebih baik kepada pengguna
-- Peningkatan hover effect pada card dan elemen interaktif
-- Optimasi user flow dengan menutup menu FAB secara otomatis setelah pengguna memilih opsi
-- Perbaikan tata letak pada dialog detail kartu keluarga
-- Penambahan pesan informasi ketika data tidak tersedia
-- **File yang dimodifikasi**:
-  - `client/src/pages/Warga.js` (Perbaikan UI dan penanganan error)
-  - `client/src/components/warga/WargaSidebar.js` (Penambahan tombol refresh dan perbaikan tampilan error)
-  - `client/src/components/kartuKeluarga/DetailKeluargaModal.js` (Penambahan tombol refresh dan perbaikan tampilan error)
-  - `client/src/components/kartuKeluarga/RegistrasiKeluargaModal.js` (Penyesuaian tampilan header untuk konsistensi)
-  - `client/src/index.css` (Penambahan kelas utilitas baru untuk penanganan error dan efek UI)
-- Build sukses tanpa error
+### [2024-07-18] - Implementasi Dasar Tampilan Mobile Responsif & Perbaikan Ikon Sidebar Desktop
+- Pembuatan hook `useViewport` (`client/src/hooks/useViewport.js`) untuk deteksi ukuran layar dan tipe perangkat.
+- Modifikasi komponen layout utama untuk mendukung tampilan mobile:
+  - `client/src/components/layout/Layout.js`: Mengintegrasikan `useViewport` dan state management (`isMobileMenuOpen`) untuk sidebar mobile.
+  - `client/src/components/layout/Header.js`: Menambahkan tombol hamburger menu (ikon `FiMenu`/`FiX`) yang hanya muncul di mobile, dan menyesuaikan tampilan elemen header lainnya untuk mobile.
+  - `client/src/components/layout/Sidebar.js`:
+    - Implementasi off-canvas sidebar untuk tampilan mobile, dikontrol oleh tombol hamburger di header. Termasuk animasi slide-in/out dan tombol tutup (`FiX`).
+    - Sidebar mobile otomatis tertutup saat navigasi antar halaman.
+    - Memperbaiki ikon tombol ciut/perluas (collapse/expand) untuk sidebar desktop menggunakan `FiChevronsLeft` dan `FiChevronsRight` untuk kejelasan visual yang lebih baik.
+- Build aplikasi berhasil setelah setiap tahap modifikasi.
+- Pengujian awal tampilan mobile dan desktop menunjukkan fungsionalitas dasar (navigasi sidebar, header) berjalan sesuai rencana.
 
-### [2024-07-22] - Penyesuaian Form Input Data Warga pada Pembuatan KK Baru
-- **Penyamaan Field Input `CreateKKForm.js`**:
-  - Form input untuk Kepala Keluarga (Step 2) dan Anggota Keluarga (Step 3) disamakan dan dilengkapi field-fieldnya (NIK, Nama Lengkap, Tempat/Tgl Lahir, Jenis Kelamin, Agama, Status Perkawinan, Pekerjaan, Pendidikan Terakhir, Kewarganegaraan).
-  - Field `statusHubungan` pada Step 2 (Kepala Keluarga) diatur otomatis sebagai "Kepala Keluarga" dan bersifat read-only.
-- **Penyesuaian Opsi Status Hubungan**:
-  - Opsi pada dropdown "Status Hubungan" di Step 3 (`CreateKKForm.js`) disesuaikan agar lebih lengkap sesuai gambar (Istri, Anak, Cucu, Orang Tua, Mertua, Menantu, Famili Lain, Lainnya).
-- **Verifikasi Backend**:
-  - Dipastikan bahwa field-field baru yang dikirim dari frontend (`agama`, `statusPerkawinan`, `pekerjaan`, `pendidikanTerakhir`, `kewarganegaraan`) sudah dapat diterima oleh controller `wargaController.js` dan didukung oleh model `Warga` di `prisma/schema.prisma`.
-- **Build Status**:
-  - Build sisi client (`cd client && npm run build`) berhasil, dengan beberapa warning ESLint yang sudah ada sebelumnya.
-- **File yang dimodifikasi**:
-  - `client/src/components/kartuKeluarga/CreateKKForm.js`
-
-### [2024-07-23] - Implementasi Fitur Edit Anggota Keluarga (Lanjutan)
-- Melanjutkan implementasi fitur edit anggota keluarga yang sebelumnya belum tuntas.
-- Tombol "Edit" pada `DetailKeluargaModal.js` diubah agar mengirim seluruh objek `anggota` ke fungsi `handleEditAnggotaInKK` di `Warga.js`.
-- Fungsi `handleEditAnggotaInKK` di `Warga.js` dimodifikasi untuk menerima objek `anggota` dan `kkIdContext`, lalu membuka modal edit anggota (`EditAnggotaFormModal`).
-- State `isEditAnggotaModalOpen`, `editingAnggotaData`, dan `currentKkIdContextForEdit` ditambahkan dan dikelola di `Warga.js`.
-- File `client/src/components/kartuKeluarga/EditAnggotaFormModal.js` yang sudah ada, diperiksa dan disesuaikan.
-- Nama properti dalam `useEffect` di `EditAnggotaFormModal.js` disesuaikan untuk sinkronisasi dengan data `anggotaData` yang diterima dari `Warga.js` (misalnya, `anggotaData.nama` menjadi `anggotaData.namaLengkap`).
-- **File yang dimodifikasi**:
-  - `client/src/components/kartuKeluarga/DetailKeluargaModal.js`
-  - `client/src/pages/Warga.js`
-  - `client/src/components/kartuKeluarga/EditAnggotaFormModal.js`
-- Build sisi client (`cd client && npm run build`) berhasil dengan beberapa warning ESLint yang sudah ada sebelumnya.
-
-### [2024-07-24] - Analisis dan Penyempurnaan Fitur Filter & Ekspor Modul Warga
-- **Analisis Kode Komprehensif:**
-  - Melakukan review kode pada `Dev_log.txt`, `client/src/pages/Warga.js`, `client/src/components/warga/WargaFilterComponent.js`, `client/src/services/api.js`, dan `server/controllers/wargaController.js`.
-  - Ditemukan bahwa fungsionalitas dasar untuk filter lanjutan (termasuk NIK/Nama, Agama, JK, Status Kawin, Pekerjaan, Pendidikan Terakhir, Usia, Kepala Keluarga) dan ekspor data (CSV, PDF dengan pemilihan kolom) sudah ada di frontend dan backend.
-- **Penyempurnaan Frontend:**
-  - Memodifikasi `client/src/components/warga/WargaFilterComponent.js`:
-    - Menambahkan UI input filter untuk field "Pendidikan Terakhir" agar konsisten dengan kapabilitas backend dan `initialFilterParams` di `Warga.js`.
-    - Menghapus definisi komponen `ColumnSelectorModal` yang duplikat dan tidak terpakai (versi yang benar sudah diimpor dari `components/modals/`).
-  - Build sisi client (`npm run build --prefix client`) berhasil setelah modifikasi dengan hanya warning ESLint yang sudah ada sebelumnya.
-- **Verifikasi Backend dan Dependensi:**
-  - `server/controllers/wargaController.js` sudah memiliki logika untuk menangani filter `pendidikanTerakhir` dan parameter `columns` untuk ekspor.
-  - Fungsi `formatWargaForExport` sudah menyertakan `pendidikanTerakhir`.
-  - Library `json2csv` dan `pdfmake` sudah digunakan untuk ekspor.
-  - Keberadaan file font Roboto (`Roboto-Regular.ttf`, `Roboto-Medium.ttf`, dll.) yang diperlukan oleh `pdfmake` telah diverifikasi di `public/fonts/`.
-- **Status Fitur:**
-  - Filter lanjutan warga dan fitur ekspor (CSV/PDF) kini siap untuk pengujian fungsional yang lebih mendalam.
-- **File yang dimodifikasi:**
-  - `client/src/components/warga/WargaFilterComponent.js`
-- **Rekomendasi Selanjutnya:**
-  - Pengujian komprehensif fitur filter dan ekspor.
-  - Pertimbangkan untuk mengubah input "Pendidikan Terakhir" menjadi dropdown jika ada opsi standar.
-
-### [2024-07-25] - Konversi Filter Pendidikan Terakhir ke Dropdown
-- **Perubahan Frontend (Filter Warga):**
-  - Memodifikasi `client/src/components/warga/WargaFilterComponent.js`:
-    - Mengubah input field untuk filter "Pendidikan Terakhir" dari tipe `text` menjadi `select` (dropdown).
-    - Menambahkan `pendidikanTerakhirOptions` yang berisi daftar standar jenjang pendidikan (Tidak Sekolah, Tamat SD, SMP, SMA, Diploma, S1, S2, S3, Lainnya).
-    - Opsi "Semua Pendidikan" ditambahkan sebagai nilai default untuk dropdown.
-  - Tujuan perubahan ini adalah untuk meningkatkan konsistensi data input untuk filter pendidikan.
-- **Build Status:**
-  - Build sisi client (`npm run build --prefix client`) berhasil setelah modifikasi, dengan hanya warning ESLint yang sudah ada sebelumnya.
-- **File yang dimodifikasi:**
-  - `client/src/components/warga/WargaFilterComponent.js`
-
-### [2024-07-25] - Implementasi Validasi Komprehensif pada Form Kartu Keluarga
-- Penambahan fungsi validasi pada form Kartu Keluarga:
-  - Validasi NIK (16 digit angka) pada form Kepala Keluarga dan Anggota Keluarga
-  - Validasi Nomor KK (16 digit angka) pada form data KK
-  - Validasi nama (minimal 3 karakter, maksimal 100 karakter, format yang valid)
-  - Validasi tempat lahir (minimal 3 karakter, maksimal 50 karakter)
-  - Validasi tanggal lahir (tidak boleh di masa depan, maksimal 120 tahun)
-  - Validasi alamat (minimal 5 karakter, maksimal 255 karakter)
-  - Validasi RT/RW (format angka 1-3 digit)
-  - Validasi kode pos (format 5 digit angka)
-  - Validasi status hubungan (harus sesuai dengan opsi yang tersedia)
-- Penerapan validasi pada backend (double check):
-  - Validasi semua field penting di `kartuKeluargaController.js` untuk `createKartuKeluarga` dan `addAnggotaKeluarga`
-  - Validasi field di `wargaController.js` untuk `createWarga`
-- Perbaikan UX di frontend:
-  - Tampilan pesan error yang jelas pada setiap field yang tidak valid
-  - Pengecekan sebelum pindah langkah pada form multi-step
-  - Pengecekan sebelum submit form
-- **File yang dimodifikasi**:
-  - `client/src/components/kartuKeluarga/CreateKKForm.js` (Implementasi validasi form pembuatan KK)
-  - `client/src/components/kartuKeluarga/AddAnggotaForm.js` (Implementasi validasi form tambah anggota)
-  - `server/controllers/kartuKeluargaController.js` (Validasi input di backend untuk KK)
-  - `server/controllers/wargaController.js` (Validasi input di backend untuk Warga)
-- Build sukses tanpa error
-
-### [2024-07-26] - Peningkatan UI/UX Form Pembuatan KK (Step 3)
-- **Tujuan**: Meningkatkan kejelasan dan pengalaman pengguna pada Step 3 (Tambah Anggota Keluarga) di form pembuatan Kartu Keluarga baru (`CreateKKForm.js`).
-- **Perubahan Frontend (`client/src/components/kartuKeluarga/CreateKKForm.js`):**
-  - **Peningkatan Tampilan Step 3:**
-    - Menampilkan ringkasan (summary) data Kepala Keluarga yang telah diinput pada Step 2 di bagian atas Step 3 untuk memberikan konteks kepada pengguna.
-    - Menampilkan daftar anggota keluarga yang sudah berhasil ditambahkan (dari state `anggotaKeluarga`) secara dinamis. Setiap anggota dalam daftar ini dilengkapi dengan nama, NIK, status hubungan, dan tombol "Hapus" untuk memungkinkan koreksi sebelum KK disimpan.
-    - Fungsi `handleHapusAnggotaDariDaftar` ditambahkan untuk menangani penghapusan anggota dari daftar sementara ini.
-  - **Alur Penambahan Anggota Baru yang Lebih Terkontrol:**
-    - Form input detail untuk anggota keluarga baru (`currentAnggota`) kini disembunyikan secara default saat pengguna pertama kali masuk ke Step 3.
-    - Ditambahkan tombol baru "Tambah Anggota Keluarga Baru". Mengklik tombol ini akan menampilkan form input anggota.
-    - State baru `showAnggotaForm` (boolean) ditambahkan untuk mengontrol visibilitas form input anggota ini.
-    - State `showAnggotaForm` direset ke `false` saat pengguna bernavigasi antar step (maju atau mundur) untuk memastikan form tersembunyi secara default saat Step 3 pertama kali ditampilkan.
-    - Tombol "Tambah Anggota Ini ke Daftar" (yang memanggil `handleTambahAnggota`) tetap berfungsi seperti sebelumnya di dalam form yang muncul, dan form akan tetap terlihat setelah anggota ditambahkan untuk input berurutan.
-  - **Tombol Simpan KK Informatif:** Tombol "Simpan Kartu Keluarga" di akhir Step 3 kini menampilkan teks yang lebih dinamis, mengindikasikan apakah akan menyimpan KK hanya dengan Kepala Keluarga atau dengan sejumlah anggota yang telah ditambahkan (misalnya, "Simpan Kartu Keluarga (+ 2 Anggota)").
-  - **Perbaikan Styling & Aksesibilitas Minor:** Penyesuaian kelas Tailwind CSS untuk meningkatkan tampilan dan penambahan `id` unik pada beberapa elemen form.
-  - **Penyesuaian Logika Validasi `handleSubmit`**: Validasi untuk `currentAnggota` yang datanya belum ditambahkan ke daftar `anggotaKeluarga` disesuaikan agar tidak menghalangi submit jika pengguna memang tidak ingin menambahkan data tersebut (form akan diabaikan jika tidak di-submit melalui "Tambah Anggota Ini ke Daftar").
-- **File yang dimodifikasi**:
-  - `client/src/components/kartuKeluarga/CreateKKForm.js`
-- **Build Status**: Build sisi client (`npm run build --prefix client`) berhasil tanpa error baru (hanya warning ESLint yang sudah ada sebelumnya).
-
-### [2024-07-26] - Penambahan Tombol Batal pada Form Input Anggota KK
-- **Tujuan**: Memberikan opsi kepada pengguna untuk membatalkan penambahan anggota baru saat form input anggota sedang terbuka di Step 3 pada `CreateKKForm.js`.
-- **Perubahan Frontend (`client/src/components/kartuKeluarga/CreateKKForm.js`):**
-  - Ditambahkan tombol "Batal" di dalam form input untuk anggota baru (yang muncul ketika `showAnggotaForm` true).
-  - Tombol "Batal" ini diletakkan di samping tombol "Tambah Anggota Ini ke Daftar".
-  - **Fungsionalitas Tombol Batal**: Saat diklik, tombol ini akan:
-    1. Mengosongkan semua field input pada form anggota baru (mereset state `currentAnggota`).
-    2. Menghapus semua pesan error validasi yang mungkin terkait dengan form anggota baru (mereset state `errors`).
-    3. Menyembunyikan kembali form input anggota baru (menyetel `showAnggotaForm` ke `false`).
-- **File yang dimodifikasi**:
-  - `client/src/components/kartuKeluarga/CreateKKForm.js`.
-- **Build Status**: Build sisi client (`npm run build --prefix client`) berhasil tanpa error baru (hanya warning ESLint yang sudah ada sebelumnya).
-
-### [2025-05-10] - Perbaikan Mayor Inisialisasi Prisma Client dan Struktur Dependensi
-- **Masalah yang Diidentifikasi**:
-  - Error runtime `P2021: The table main.Warga (atau main.KartuKeluarga) does not exist`.
-  - Error runtime `TypeError: pool.query is not a function` di `wargaController.js`.
-  - Error runtime `TypeError: Cannot read properties of undefined (reading 'groupBy')` di `iuranController.js`.
-  - Log runtime menunjukkan Prisma mencoba menggunakan `sqlite pool` padahal koneksi dikonfigurasi untuk PostgreSQL.
-  - Error runtime `@prisma/client did not initialize yet` setelah upaya perbaikan awal.
-- **Analisis Penyebab**:
-  - `server/models/prisma.js` salah menginisialisasi `pg.Pool` manual bukannya `PrismaClient`.
-  - Controller (`wargaController.js`) masih mencoba menggunakan sintaks `pg.Pool` (`pool.query()`) setelah `server/models/prisma.js` diubah untuk mengekspor `PrismaClient` (yang diimpor sebagai `pool`).
-  - `kartuKeluargaController.js` menginisialisasi instance `PrismaClient` lokalnya sendiri, bukannya menggunakan instance bersama.
-  - Masalah `sqlite pool` dan `P2021` yang persisten kemungkinan disebabkan oleh cara `prisma generate` dieksekusi dan bagaimana `@prisma/client` di-resolve dalam struktur monorepo dengan `node_modules` di beberapa level. Dependensi `@prisma/client` dan `prisma` (CLI) ada di `server/package.json`, menyebabkan `server/models/prisma.js` me-resolve ke `@prisma/client` yang salah (belum di-generate) di `server/node_modules/` sementara `prisma generate` (dijalankan dari `server/`) menghasilkan output ke `ROOT/node_modules/.prisma/client`.
-  - Konflik pada script `npm run install-all` dan `postinstall` di root `package.json` yang menyebabkan `prisma:generate` gagal.
-- **Langkah Perbaikan Utama**:
-  - Mengubah `server/models/prisma.js` untuk menginisialisasi dan mengekspor `PrismaClient` dengan benar.
-  - Merefaktorisasi `server/controllers/wargaController.js` (fungsi `getAllWarga`) untuk menggunakan sintaks `PrismaClient`.
-  - Mengubah `server/controllers/kartuKeluargaController.js` untuk menggunakan instance `PrismaClient` bersama dari `server/models/prisma.js`.
-  - Memastikan `server/controllers/iuranController.js` sudah menggunakan instance `PrismaClient` bersama dengan benar.
-  - Menghapus dependensi `@prisma/client` dan `prisma` dari `server/package.json`.
-  - Menghapus script `postinstall` dari `server/package.json`.
-  - Menambahkan dependensi `@prisma/client` dan `prisma` (CLI) ke `package.json` root.
-  - Menambahkan script `prisma:generate` di `package.json` root (`prisma generate --schema ./prisma/schema.prisma`).
-  - Mengubah script `install-all` di `package.json` root untuk menjalankan `npm run prisma:generate` di akhir, setelah semua instalasi (root, server, client) selesai.
-  - Menghapus script `postinstall` dari `package.json` root untuk menghindari konflik dengan `install-all`.
-  - Melakukan instalasi ulang penuh (`node_modules` dihapus) untuk menerapkan struktur dependensi dan proses build yang baru.
-- **Hasil**:
-  - Aplikasi (server dan client) berhasil dijalankan tanpa error runtime terkait Prisma atau koneksi database yang dilaporkan sebelumnya.
-  - Prisma Client sekarang diinisialisasi dengan benar dan menggunakan driver PostgreSQL sesuai konfigurasi.
-- **File yang dimodifikasi**:
-  - `server/models/prisma.js`
-  - `server/controllers/wargaController.js`
-  - `server/controllers/kartuKeluargaController.js`
-  - `server/package.json`
-  - `package.json` (root)
-
-### [2025-05-11] - Deployment dan Debugging Backend ke Netlify Functions
-- **Tujuan**: Men-deploy backend Express.js sebagai Netlify Function dan memastikan fungsionalitas API.
-- **Langkah Awal & Konfigurasi Frontend:**
-  - Mengubah `baseURL` Axios di `client/src/services/api.js` menjadi path relatif (`'/api'`) untuk kompatibilitas dengan redirect Netlify.
-  - Merefaktor `client/src/services/kegiatanService.js` untuk menggunakan instance Axios bersama dari `api.js` dan path relatif, menghilangkan hardcoded `localhost:5000`.
-- **Konfigurasi Netlify (`netlify.toml`):**
-  - Perintah build sudah mencakup `npm install` untuk root, client, server, dan `npx prisma generate`.
-  - `functions = "server"` sudah benar menunjuk ke direktori handler.
-  - Redirect API (`from = "/api/*" to = "/.netlify/functions/netlify-handler/:splat" status = 200 force = true`) sudah ada dan dikonfigurasi dengan benar.
-- **Proses Debugging Handler Netlify (`server/netlify-handler.js`):**
-  - **Masalah Awal:** Permintaan ke URL fungsi langsung (`/.netlify/functions/netlify-handler`) dan endpoint API (`/api/*`) menghasilkan "Cannot GET ..." (404).
-  - **Debugging Iteratif:**
-    1.  **Penyederhanaan Drastis Handler:** Mengganti `netlify-handler.js` dengan fungsi Netlify standar (tanpa Express/serverless-http). Hasil: Sukses diakses via URL langsung. Ini mengkonfirmasi Netlify bisa menjalankan fungsi dasar di path tersebut.
-    2.  **Pengembalian Struktur Express Dasar:** Mengembalikan `express` dan `serverless-http` dengan satu rute root (`app.get('/', ...)`). Hasil: Log fungsi menunjukkan eksekusi file dan ekspor handler, tetapi masih "Cannot GET" di browser. Log invokasi fungsi ada, tetapi log rute Express tidak terpanggil.
-    3.  **Penambahan Logging Path Detail (V4):** Menambahkan rute wildcard (`app.get('*', ...)`) di Express dan logging detail `event.path` (Netlify) serta `req.originalUrl`, `req.path` (Express).
-       - **Penemuan Kunci:** `serverless-http` meneruskan `event.path` (misalnya, `/.netlify/functions/netlify-handler` atau `/api/warga`) apa adanya ke Express. Aplikasi Express tidak memiliki rute yang cocok karena hanya ada `app.get('/', ...)`. Rute wildcard menangkap ini.
-  - **Solusi (`server/netlify-handler.js` - V5):**
-    - Membuat `app = express()` dan `router = express.Router()`.
-    - Semua middleware API (bodyParser) dan rute aplikasi (`wargaRoutes`, `iuranRoutes`, dll.) diterapkan pada `router`.
-    - `router` kemudian di-mount pada aplikasi utama dengan path dasar: `app.use('/api', router);`.
-    - Dengan cara ini, ketika `serverless-http` meneruskan `event.path` seperti `/api/warga` ke `app`, `app` akan mencocokkannya dengan `router` yang di-mount di `/api`. Kemudian `router` akan mencocokkan sisa path (`/warga`) dengan `router.use('/warga', wargaRoutes)`. Rute di dalam `wargaRoutes` (misalnya, `get('/', ...)`) sekarang akan benar relatif terhadap `/api/warga`.
-- **Hasil Akhir:**
-  - Endpoint `/api/` berhasil diakses dan mengembalikan respons JSON yang diharapkan dari `router.get('/', ...)`.
-  - Log fungsi Netlify menunjukkan Prisma Client berhasil diinisialisasi dan membaca `DATABASE_URL`.
-  - API backend sekarang berfungsi dengan benar di Netlify Functions.
-- **File yang dimodifikasi secara signifikan selama proses ini**:
-  - `client/src/services/api.js`
-  - `client/src/services/kegiatanService.js`
-  - `server/netlify-handler.js` (beberapa iterasi)
-- **Pelajaran Penting untuk Deployment Netlify Functions dengan Express:**
-  - Pastikan `netlify.toml` memiliki redirect yang benar untuk API Anda (`from = "/api/*" to = "/NETLIFY_FUNCTION_PATH/:splat"`).
-  - `serverless-http` akan meneruskan `event.path` (yang mungkin sudah termasuk path prefix dari redirect, seperti `/api`) ke aplikasi Express.
-  - Aplikasi Express di dalam handler Netlify perlu di-mount atau memiliki rute yang memperhitungkan path yang diterima ini. Menggunakan `express.Router()` yang di-mount pada path yang sesuai (misalnya, `app.use('/api', routerApi);`) adalah solusi yang bersih.
-  - Verifikasi variabel lingkungan (`DATABASE_URL`, `FRONTEND_URL`, dll.) di UI Netlify sangat krusial.
-  - Iterasi penyederhanaan fungsi saat debugging sangat membantu mengisolasi masalah.
-
-### [2025-05-11] - Konfigurasi API URL Dinamis untuk Lokal dan Produksi
-- **Tujuan**: Memastikan aplikasi frontend dapat berkomunikasi dengan backend baik di lingkungan pengembangan lokal maupun saat di-deploy di Netlify.
-- **Masalah**: Setelah backend di-deploy ke Netlify Functions dan `API_URL` di `client/src/services/api.js` diubah menjadi `'/api'` (untuk menggunakan redirect Netlify), konfigurasi ini tidak berfungsi untuk pengembangan lokal karena frontend lokal memerlukan URL backend absolut (misalnya, `http://localhost:5000/api`).
-- **Solusi Diterapkan (`client/src/services/api.js`):**
-  - `API_URL` diubah menjadi dinamis:
-    ```javascript
-    const API_URL = process.env.REACT_APP_API_URL || '/api';
-    ```
-  - **Untuk Pengembangan Lokal:**
-    - Variabel lingkungan `REACT_APP_API_URL` (misalnya, `REACT_APP_API_URL=http://localhost:5000/api`) harus diatur dalam file `.env` di direktori `client/`.
-    - Jika `REACT_APP_API_URL` ada, frontend akan menggunakan URL absolut ini.
-    - Server pengembangan React perlu di-restart setelah mengubah `.env`.
-  - **Untuk Produksi (Netlify):**
-    - `REACT_APP_API_URL` tidak akan ada (kecuali diatur secara eksplisit di Netlify, yang tidak diperlukan untuk kasus ini).
-    - `API_URL` akan default ke `'/api'`, yang akan benar ditangani oleh redirect Netlify.
-- **Hasil**: Aplikasi sekarang dapat menggunakan endpoint API yang benar secara otomatis tergantung pada lingkungan (lokal vs. produksi Netlify).
-- **File yang dimodifikasi**:
-  - `client/src/services/api.js`
-- **Catatan Tambahan**: Perubahan ini aman untuk di-commit dan di-push karena dirancang untuk kompatibilitas lintas lingkungan.
+### [2024-07-19] - Penyesuaian WargaSidebar, Perbaikan FAB, Implementasi Speed Dial, Perbaikan DetailKartuKeluargaPanel, dan Scroll Into View untuk Item KK Aktif
+- **`WargaSidebar.js`**: Diintegrasikan dengan `useViewport` untuk penyesuaian styling di mobile (padding, font, ikon, penyembunyian tag RT/RW).
+- **FAB `Warga.js`**:
+    - Awalnya diubah menjadi `position: fixed` untuk mengatasi masalah ikut ter-scroll.
+    - Kemudian diimplementasikan logika hide/show on scroll menggunakan `framer-motion` (dihapus karena membingungkan user).
+    - Diimplementasikan **Speed Dial FAB** dengan dua aksi: "Tambah Kartu Keluarga Baru" dan "Tambah Anggota Keluarga" (sementara menampilkan toast).
+    - Warna label Speed Dial diubah menjadi `bg-gray-700 text-white`.
+    - Warning ESLint `useRef no-unused-vars` diperbaiki.
+- **Placeholder Detail KK `Warga.js`**: Fungsi klik pada link "Atau buat Kartu Keluarga baru" di placeholder panel detail KK dihapus.
+- **`DetailKartuKeluargaPanel.js`**:
+    - Tombol "Tambah Anggota" dipindahkan dari detail Kepala Keluarga ke header bagian "Anggota Keluarga Lainnya".
+    - Ikon aksi di header panel utama diperbesar, diberi padding, dan jarak antar tombol disesuaikan.
+    - Styling tombol aksi individu Kepala Keluarga ("Lihat Detail", "Edit Profil") diubah menjadi tombol border standar yang lebih kecil.
+- **`WargaSidebar.js` (Scroll Into View)**: Mengimplementasikan `scrollIntoView` untuk item KK yang aktif. Ketika sebuah KK dipilih, sidebar akan otomatis scroll untuk memastikan item tersebut sepenuhnya terlihat, terutama jika sebelumnya terpotong oleh panel detail.
+    - Menggunakan `useRef` untuk menyimpan referensi ke elemen item KK.
+    - Menggunakan `useEffect` untuk memantau perubahan `selectedKKId` dan memicu scroll.
+- Semua build berhasil setelah modifikasi terkait.

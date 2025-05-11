@@ -1,0 +1,122 @@
+# Rencana Desain & Implementasi: Tampilan Mobile Responsif
+
+## 1. Tujuan Utama
+
+Mengadaptasi aplikasi web SuperApps RT agar sepenuhnya responsif dan memberikan pengalaman pengguna yang optimal di perangkat mobile (smartphone dan tablet).
+
+## 2. Analisis Awal & Teknologi
+
+- **Framework Frontend:** React.js
+- **Styling:** Tailwind CSS
+- **Struktur Proyek (Client):**
+    - `client/src/components/layout/`: Komponen layout global (Sidebar, Header).
+    - `client/src/components/warga/WargaSidebar.js`: Sidebar spesifik dengan accordion.
+    - `client/src/pages/Warga.js`: Halaman utama dengan sistem Tab.
+    - Berbagai komponen Modal (`*.Modal.js`) dan Form (`*Form.js`).
+    - Floating Action Button (FAB) untuk registrasi.
+
+## 3. Pendekatan Umum
+
+Kombinasi strategi berikut akan digunakan:
+
+1.  **Responsive Design dengan Tailwind CSS:** Memanfaatkan breakpoint (`sm:`, `md:`, `lg:`, `xl:`) dan utility classes responsif Tailwind CSS untuk sebagian besar penyesuaian layout, penyembunyian/penampilan elemen, dan styling.
+2.  **Custom React Hook (`useViewport`):** Membuat hook kustom `useViewport` untuk mendeteksi dimensi viewport (lebar, tinggi) dan tipe perangkat (mobile, tablet, desktop) secara dinamis. Ini akan membantu dalam logika conditional rendering yang lebih kompleks.
+3.  **Conditional Rendering di React:** Untuk kasus di mana struktur komponen atau layout sangat berbeda antara mobile dan desktop, komponen spesifik akan dirender berdasarkan output dari hook `useViewport`.
+
+## 4. Area Kunci dan Rencana Adaptasi
+
+### 4.1. Navigasi Utama (Layout Global)
+
+-   **Komponen:** `client/src/components/layout/Sidebar.js`, `client/src/components/layout/Header.js` (jika ada atau perlu dibuat/modifikasi untuk mobile).
+-   **Rencana Mobile:**
+    -   **Sidebar Utama:** Transformasi menjadi *off-canvas sidebar* (drawer) yang muncul dari sisi kiri (atau kanan) layar.
+    -   **Pemicu:** Sebuah tombol "hamburger icon" akan ditempatkan di header (atau area yang mudah dijangkau) untuk membuka/menutup off-canvas sidebar.
+    -   **Implementasi:**
+        -   Gunakan state di komponen layout utama (misal `MainLayout.js` atau `App.js`) untuk mengontrol visibilitas sidebar mobile.
+        -   Gunakan kelas transisi Tailwind CSS (`transform`, `translate-x`, `transition-transform`) untuk animasi buka/tutup.
+        -   Header mungkin perlu penyesuaian untuk mengakomodasi tombol hamburger dan judul halaman agar tetap terlihat baik di layar sempit.
+
+### 4.2. Sidebar Warga (`client/src/components/warga/WargaSidebar.js`)
+
+-   **Fungsionalitas:** Menampilkan daftar Kepala Keluarga dengan fitur accordion.
+-   **Rencana Mobile:**
+    -   **Opsi 1 (Prioritas):** Pertahankan fungsionalitas accordion jika memungkinkan, namun dengan styling yang lebih ringkas dan vertikal. Pastikan area tap untuk expand/collapse cukup besar.
+    -   **Opsi 2 (Jika Opsi 1 terlalu padat):** Ubah menjadi daftar item yang dapat di-tap. Men-tap item akan:
+        -   Langsung menavigasi ke detail (jika desainnya memungkinkan).
+        -   Atau membuka modal/view baru yang menampilkan anggota keluarga (menggantikan fungsi accordion expand).
+    -   Pertimbangkan untuk menyembunyikan sidebar ini di balik tombol atau membuatnya sebagai bagian dari konten utama yang bisa di-scroll di mobile, bukan sebagai sidebar tetap.
+
+### 4.3. Halaman Warga (`client/src/pages/Warga.js`) - Sistem Tab
+
+-   **Fungsionalitas:** Menggunakan sistem tab untuk memisahkan "Kartu Keluarga" dan "Daftar Warga".
+-   **Rencana Mobile:**
+    -   **Opsi 1 (Prioritas):** Tab yang dapat di-scroll horizontal jika jumlah tab sedikit (2-3). Pastikan ada indikator visual bahwa tab bisa di-scroll.
+    -   **Opsi 2:** Ubah menjadi dropdown selector untuk memilih tab.
+    -   **Opsi 3:** Tampilkan konten tab secara vertikal (sebagai tumpukan/stacked sections) jika memungkinkan dan tidak membuat halaman terlalu panjang.
+    -   Pastikan area konten di bawah tab menyesuaikan diri dengan baik.
+
+### 4.4. Modal (`*.Modal.js`)
+
+-   **Komponen:** `RegistrasiKeluargaModal.js`, `DetailKartuKeluargaModal.js`, dll.
+-   **Rencana Mobile:**
+    -   **Ukuran:** Modal harus menyesuaikan lebar layar mobile (misalnya `w-full` atau `max-w-sm/md` dengan margin).
+    -   **Tinggi & Scrolling:** Jika konten modal panjang, pastikan modal memiliki `max-height` (misal `max-h-screen` atau `max-h-[80vh]`) dan konten internalnya dapat di-scroll (`overflow-y-auto`).
+    -   **Tombol Aksi:** Pastikan tombol (Simpan, Batal, Tutup) mudah dijangkau, mungkin diletakkan di footer modal atau di atas.
+
+### 4.5. Form (`*Form.js`, `CreateKKForm.js`, `AddAnggotaForm.js`)
+
+-   **Rencana Mobile:**
+    -   **Layout:** Gunakan layout satu kolom untuk semua field input, label, dan tombol.
+    -   **Input Fields:** Pastikan input fields memiliki lebar yang cukup (`w-full`).
+    -   **Touch Targets:** Tombol, checkbox, radio button harus memiliki area sentuh yang cukup besar.
+    -   **Validasi:** Pesan validasi harus terlihat jelas di bawah field terkait.
+
+### 4.6. Floating Action Button (FAB)
+
+-   **Fungsionalitas:** Registrasi Keluarga.
+-   **Rencana Mobile:**
+    -   **Posisi:** Verifikasi ulang posisi FAB agar tidak menutupi konten penting atau navigasi lain di layar mobile.
+    -   **Aksesibilitas:** Pastikan mudah dijangkau dengan jari.
+    -   Jika FAB memiliki sub-menu, pastikan animasi dan tampilan sub-menu bekerja dengan baik di mobile.
+
+## 5. Langkah Implementasi Umum
+
+1.  **Buat `useViewport` Hook:**
+    -   Lokasi: `client/src/hooks/useViewport.js`
+    -   Fungsi: Mengembalikan `{ width, height, device ('mobile' | 'tablet' | 'desktop') }`.
+    -   Update `device` berdasarkan breakpoint yang umum digunakan (misal, <768px = mobile, <1024px = tablet).
+
+2.  **Adaptasi Layout Utama (Global):**
+    -   Integrasikan `useViewport` di komponen layout utama (`App.js` atau wrapper layout).
+    -   Implementasikan off-canvas sidebar utama dan tombol hamburger.
+    -   Sesuaikan header untuk mobile.
+
+3.  **Iterasi per Komponen/Halaman:**
+    -   Mulai dari komponen/halaman paling krusial (Navigasi, `Warga.js`, `WargaSidebar.js`).
+    -   Terapkan strategi dari **Bagian 4** menggunakan Tailwind CSS dan conditional rendering.
+    -   Gunakan `useViewport` jika logika adaptasi kompleks.
+
+4.  **Styling Tambahan:**
+    -   Pastikan tipografi (ukuran font, line-height) nyaman dibaca di mobile.
+    -   Sesuaikan padding dan margin untuk memberikan ruang napas yang cukup.
+
+5.  **Pengujian:**
+    -   Gunakan DevTools browser untuk simulasi berbagai ukuran layar mobile.
+    -   Jika memungkinkan, uji di perangkat fisik.
+    -   Periksa orientasi portrait dan landscape.
+
+## 6. Pertimbangan Tambahan
+
+-   **Performa:** Hindari conditional rendering yang berlebihan atau state update yang tidak perlu yang bisa mempengaruhi performa di perangkat mobile.
+-   **User Experience (UX):** Fokus pada kemudahan navigasi dan interaksi sentuh.
+-   **Konsistensi:** Jaga konsistensi visual antara tampilan desktop dan mobile, meskipun layoutnya berbeda.
+
+## 7. Struktur File Potensial (Baru/Modifikasi Utama)
+
+-   `client/src/hooks/useViewport.js` (Baru)
+-   `client/src/components/layout/Sidebar.js` (Modifikasi signifikan)
+-   `client/src/components/layout/Header.js` (Modifikasi/Baru)
+-   `client/src/components/layout/MainLayout.js` (Modifikasi/Baru - sebagai wrapper utama jika belum ada)
+-   `client/src/pages/Warga.js` (Modifikasi signifikan untuk Tabs)
+-   `client/src/components/warga/WargaSidebar.js` (Modifikasi signifikan)
+-   File-file modal dan form lainnya (Modifikasi untuk ukuran dan layout). 
