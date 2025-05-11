@@ -1,13 +1,21 @@
 // server/netlify-handler.js
-exports.handler = async (event, context) => {
-  console.log("netlify-handler.js: Basic handler invoked!");
-  console.log("netlify-handler.js: Event path:", event.path); // Log path yang diterima
+const serverless = require('serverless-http');
+const express = require('express');
 
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: "Ultra-Simplified Netlify Function is ALIVE!" }),
-  };
-};
+const app = express();
 
-console.log("netlify-handler.js: Basic handler script executed and exported."); 
+console.log("[V2] netlify-handler.js: Top level script execution, Express app initialized.");
+
+// Middleware dasar bisa ditambahkan di sini jika dirasa aman, atau tambahkan nanti
+// Contoh: app.use(express.json()); // Jika hanya butuh parser JSON bawaan Express
+
+app.get('/', (req, res) => {
+  console.log("[V2] netlify-handler.js: Express root path ('/') was hit!");
+  res.status(200).json({ message: '[V2] Express Netlify Function is ALIVE!' });
+});
+
+// Jangan tambahkan rute atau middleware kompleks lainnya dulu
+
+module.exports.handler = serverless(app);
+
+console.log("[V2] netlify-handler.js: Express Handler exported."); 
