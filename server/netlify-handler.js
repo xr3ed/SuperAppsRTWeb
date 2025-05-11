@@ -1,38 +1,56 @@
 // server/netlify-handler.js
 const serverless = require('serverless-http');
 const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
-const app = express();
+const app = express(); // Aplikasi Express utama
+const router = express.Router(); // Router yang akan kita mount di /api
 
-console.log("[V4] netlify-handler.js: Top level script execution, Express app initialized.");
+console.log("[V5] netlify-handler.js: Top level script execution.");
 
-// Rute root yang kita harapkan
-app.get('/', (req, res) => {
-  console.log("[V4] netlify-handler.js: Express root path ('/') was hit! Original URL:", req.originalUrl, "BaseURL:", req.baseUrl, "Path:", req.path);
-  res.setHeader('X-Custom-Handler-Identifier', 'ExpressV4-Root');
-  res.status(200).json({ message: '[V4] Express Netlify Function - Root Path - is ALIVE!' });
+// Middleware (sekarang diterapkan ke 'app' atau 'router' sesuai kebutuhan)
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || '*', 
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions)); // CORS bisa di level aplikasi
+
+// Middleware untuk router API kita
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
+
+// Test route di router API kita
+router.get('/', (req, res) => {
+  console.log("[V5] netlify-handler.js: API root path ('/') was hit! req.originalUrl:", req.originalUrl);
+  res.json({ message: '[V5] API Root is ALIVE via netlify-handler!' });
 });
 
-// Rute wildcard untuk menangkap semua path lain yang mungkin sampai ke Express
-app.get('*', (req, res) => {
-  console.log("[V4] netlify-handler.js: Express wildcard path ('*') was hit! Original URL:", req.originalUrl, "BaseURL:", req.baseUrl, "Path:", req.path);
-  res.setHeader('X-Custom-Handler-Identifier', 'ExpressV4-Wildcard');
-  res.status(404).json({ 
-    message: '[V4] Express - Path not explicitly defined by app.get("/")',
-    receivedOriginalUrl: req.originalUrl,
-    receivedBaseUrl: req.baseUrl,
-    receivedPath: req.path
+// Import rute-rute aplikasi (seperti sebelumnya)
+const wargaRoutes = require('./routes/warga');
+const iuranRoutes = require('./routes/iuran');
+const kegiatanRoutes = require('./routes/kegiatan');
+const kartuKeluargaRoutes = require('./routes/kartuKeluarga');
+
+// Gunakan rute-rute aplikasi di dalam router API kita
+// Path di sini adalah relatif terhadap '/api' nantinya
+router.use('/warga', wargaRoutes);
+router.use('/iuran', iuranRoutes);
+router.use('/kegiatan', kegiatanRoutes);
+router.use('/kartukeluarga', kartuKeluargaRoutes);
+
+// Mount router utama kita di path /api pada aplikasi Express utama
+app.use('/api', router);
+
+// Error handler (jika diperlukan, bisa di level 'app' atau 'router')
+app.use((err, req, res, next) => {
+  console.error("[V5] Error di Netlify Function:", err.stack);
+  res.status(500).json({
+    message: '[V5] Terjadi kesalahan pada server (Netlify Function)',
+    error: process.env.NODE_ENV !== 'production' ? err.message : 'Internal Server Error' 
   });
 });
 
-const expressAppHandler = serverless(app); // Ganti nama variabel agar tidak bentrok
+module.exports.handler = serverless(app);
 
-console.log("[V4] netlify-handler.js: serverless(app) created.");
-
-module.exports.handler = async (event, context) => {
-  console.log("[V4] netlify-handler.js: Netlify entrypoint invoked. Event Path:", event.path, "HTTP Method:", event.httpMethod);
-  // console.log("[V4] Full Event:", JSON.stringify(event)); // Uncomment jika perlu detail event lengkap
-  return expressAppHandler(event, context);
-};
-
-console.log("[V4] netlify-handler.js: Handler exported to Netlify."); 
+console.log("[V5] netlify-handler.js: Handler exported."); 
