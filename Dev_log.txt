@@ -419,50 +419,58 @@
   - `server/package.json`
   - `package.json` (root)
 
-### [TANGGAL_HARI_INI] - Perbaikan Alur Pembuatan Kartu Keluarga
-- **Masalah:** Terjadi error "Gagal menyimpan data: Terjadi kesalahan saat membuat kartu keluarga" saat menyimpan Kartu Keluarga baru tanpa anggota tambahan.
-- **Analisis:**
-  - Log frontend menunjukkan bahwa pembuatan Warga untuk Kepala Keluarga (via `wargaService.createWarga`) berhasil.
-  - Pembuatan Kartu Keluarga (via `kartuKeluargaService.createKartuKeluarga` yang memanggil `exports.createKartuKeluarga` di server) juga berhasil. Fungsi `exports.createKartuKeluarga` di server secara otomatis sudah membuat relasi `KeluargaWarga` untuk Kepala Keluarga yang baru.
-  - Error (HTTP 400 Bad Request) terjadi pada panggilan frontend berikutnya ke `kartuKeluargaService.addAnggotaKeluarga` yang bertujuan untuk menautkan Kepala Keluarga yang sama ke KK yang sama.
-  - Fungsi `exports.addAnggotaKeluarga` di server menolak permintaan ini karena KK tersebut sudah memiliki Kepala Keluarga (yang baru saja dibuat oleh `exports.createKartuKeluarga`).
-- **Solusi:** Menghapus/mengomentari panggilan `kartuKeluargaService.addAnggotaKeluarga` yang redundan dari `client/src/components/kartuKeluarga/CreateKKForm.js` ketika membuat KK baru, karena penautan Kepala Keluarga awal sudah ditangani oleh server saat `createKartuKeluarga`.
-- **File yang dimodifikasi**:
-  - `client/src/components/kartuKeluarga/CreateKKForm.js` (menghapus panggilan API redundan)
-- Build frontend berhasil setelah perbaikan.
+### [2025-05-11] - Deployment dan Debugging Backend ke Netlify Functions
+- **Tujuan**: Men-deploy backend Express.js sebagai Netlify Function dan memastikan fungsionalitas API.
+- **Langkah Awal & Konfigurasi Frontend:**
+  - Mengubah `baseURL` Axios di `client/src/services/api.js` menjadi path relatif (`'/api'`) untuk kompatibilitas dengan redirect Netlify.
+  - Merefaktor `client/src/services/kegiatanService.js` untuk menggunakan instance Axios bersama dari `api.js` dan path relatif, menghilangkan hardcoded `localhost:5000`.
+- **Konfigurasi Netlify (`netlify.toml`):**
+  - Perintah build sudah mencakup `npm install` untuk root, client, server, dan `npx prisma generate`.
+  - `functions = "server"` sudah benar menunjuk ke direktori handler.
+  - Redirect API (`from = "/api/*" to = "/.netlify/functions/netlify-handler/:splat" status = 200 force = true`) sudah ada dan dikonfigurasi dengan benar.
+- **Proses Debugging Handler Netlify (`server/netlify-handler.js`):**
+  - **Masalah Awal:** Permintaan ke URL fungsi langsung (`/.netlify/functions/netlify-handler`) dan endpoint API (`/api/*`) menghasilkan "Cannot GET ..." (404).
+  - **Debugging Iteratif:**
+    1.  **Penyederhanaan Drastis Handler:** Mengganti `netlify-handler.js` dengan fungsi Netlify standar (tanpa Express/serverless-http). Hasil: Sukses diakses via URL langsung. Ini mengkonfirmasi Netlify bisa menjalankan fungsi dasar di path tersebut.
+    2.  **Pengembalian Struktur Express Dasar:** Mengembalikan `express` dan `serverless-http` dengan satu rute root (`app.get('/', ...)`). Hasil: Log fungsi menunjukkan eksekusi file dan ekspor handler, tetapi masih "Cannot GET" di browser. Log invokasi fungsi ada, tetapi log rute Express tidak terpanggil.
+    3.  **Penambahan Logging Path Detail (V4):** Menambahkan rute wildcard (`app.get('*', ...)`) di Express dan logging detail `event.path` (Netlify) serta `req.originalUrl`, `req.path` (Express).
+       - **Penemuan Kunci:** `serverless-http` meneruskan `event.path` (misalnya, `/.netlify/functions/netlify-handler` atau `/api/warga`) apa adanya ke Express. Aplikasi Express tidak memiliki rute yang cocok karena hanya ada `app.get('/', ...)`. Rute wildcard menangkap ini.
+  - **Solusi (`server/netlify-handler.js` - V5):**
+    - Membuat `app = express()` dan `router = express.Router()`.
+    - Semua middleware API (bodyParser) dan rute aplikasi (`wargaRoutes`, `iuranRoutes`, dll.) diterapkan pada `router`.
+    - `router` kemudian di-mount pada aplikasi utama dengan path dasar: `app.use('/api', router);`.
+    - Dengan cara ini, ketika `serverless-http` meneruskan `event.path` seperti `/api/warga` ke `app`, `app` akan mencocokkannya dengan `router` yang di-mount di `/api`. Kemudian `router` akan mencocokkan sisa path (`/warga`) dengan `router.use('/warga', wargaRoutes)`. Rute di dalam `wargaRoutes` (misalnya, `get('/', ...)`) sekarang akan benar relatif terhadap `/api/warga`.
+- **Hasil Akhir:**
+  - Endpoint `/api/` berhasil diakses dan mengembalikan respons JSON yang diharapkan dari `router.get('/', ...)`.
+  - Log fungsi Netlify menunjukkan Prisma Client berhasil diinisialisasi dan membaca `DATABASE_URL`.
+  - API backend sekarang berfungsi dengan benar di Netlify Functions.
+- **File yang dimodifikasi secara signifikan selama proses ini**:
+  - `client/src/services/api.js`
+  - `client/src/services/kegiatanService.js`
+  - `server/netlify-handler.js` (beberapa iterasi)
+- **Pelajaran Penting untuk Deployment Netlify Functions dengan Express:**
+  - Pastikan `netlify.toml` memiliki redirect yang benar untuk API Anda (`from = "/api/*" to = "/NETLIFY_FUNCTION_PATH/:splat"`).
+  - `serverless-http` akan meneruskan `event.path` (yang mungkin sudah termasuk path prefix dari redirect, seperti `/api`) ke aplikasi Express.
+  - Aplikasi Express di dalam handler Netlify perlu di-mount atau memiliki rute yang memperhitungkan path yang diterima ini. Menggunakan `express.Router()` yang di-mount pada path yang sesuai (misalnya, `app.use('/api', routerApi);`) adalah solusi yang bersih.
+  - Verifikasi variabel lingkungan (`DATABASE_URL`, `FRONTEND_URL`, dll.) di UI Netlify sangat krusial.
+  - Iterasi penyederhanaan fungsi saat debugging sangat membantu mengisolasi masalah.
 
-### [TANGGAL_HARI_INI_NEXT] - Pengurangan Verbosity Log Prisma Server
-- **Masalah:** Log query Prisma pada sisi server terlalu detail dan memenuhi konsol.
-- **Solusi:** Mengubah konfigurasi instance `PrismaClient` di `server/models/prisma.js` untuk tidak lagi mencetak log dengan level `query` ke `stdout`. Log level `info`, `warn`, dan `error` tetap dipertahankan.
-- **File yang dimodifikasi**:
-  - `server/models/prisma.js` (menyesuaikan opsi `log` pada konstruktor `PrismaClient`)
-- **Catatan:** Perlu restart server backend agar perubahan diterapkan.
-
-### [TANGGAL_HARI_INI_YET_ANOTHER] - Penghilangan Log Kustom di Warga Controller
-- **Masalah:** Terdapat log kustom informatif di `wargaController.js` pada fungsi `getAllWarga` yang tidak lagi diperlukan untuk produksi.
-- **Solusi:** Mengomentari pernyataan `console.log` yang mencetak status pengambilan data warga di `server/controllers/wargaController.js`.
-- **File yang dimodifikasi**:
-  - `server/controllers/wargaController.js`
-- **Catatan:** Perlu restart server backend agar perubahan diterapkan.
-
-### [TANGGAL_HARI_INI_NEXT] - Perbaikan UX pada Fitur Kartu Keluarga
-- **Masalah:** User perlu menekan tombol refresh secara manual di sidebar setelah menambah atau menghapus Kartu Keluarga untuk melihat perubahan.
-- **Solusi:** Memodifikasi fungsi handler di `client/src/pages/Warga.js` agar otomatis melakukan refresh data setelah operasi CRUD.
-  - Mengubah `handleRegistrasiSuccess` untuk memanggil `fetchKartuKeluarga()` setelah berhasil menambah Kartu Keluarga baru.
-  - Mengubah `executeActualDeleteKK` untuk memanggil `fetchKartuKeluarga()` setelah berhasil menghapus Kartu Keluarga.
-  - Mengubah `executeActualDeleteAnggota` untuk memanggil `fetchKartuKeluarga()` setelah berhasil menghapus anggota Kartu Keluarga.
-  - Menghapus fungsi `handleDataChangeInPanel` yang redundan.
-- **File yang dimodifikasi**:
-  - `client/src/pages/Warga.js`
-- **Perubahan Perilaku:** Sekarang perubahan data (tambah/hapus KK dan anggota) langsung terlihat di sidebar tanpa perlu menekan tombol refresh manual."
-
-### [TANGGAL_HARI_INI_NEXT_UPDATE] - Perbaikan Caching Data Kartu Keluarga
-- **Masalah:** Masih terdapat masalah di mana perubahan data (tambah/hapus KK) tidak selalu terlihat di sidebar tanpa menekan tombol refresh secara manual, yang menunjukkan adanya masalah caching.
-- **Solusi:** 
-  - Memodifikasi fungsi `getKartuKeluargaWithKepala` dan `getAllKartuKeluarga` di `client/src/services/api.js` untuk menambahkan parameter `nocache` dengan timestamp unik untuk setiap request.
-  - Parameter ini memastikan browser tidak melakukan cache terhadap request dan selalu mendapatkan data terbaru dari server.
-  - Memodifikasi komponen `WargaSidebar` untuk menerima data kartu keluarga langsung dari parent component sebagai props, sehingga data akan otomatis diperbarui saat state di parent berubah.
+### [2025-05-11] - Konfigurasi API URL Dinamis untuk Lokal dan Produksi
+- **Tujuan**: Memastikan aplikasi frontend dapat berkomunikasi dengan backend baik di lingkungan pengembangan lokal maupun saat di-deploy di Netlify.
+- **Masalah**: Setelah backend di-deploy ke Netlify Functions dan `API_URL` di `client/src/services/api.js` diubah menjadi `'/api'` (untuk menggunakan redirect Netlify), konfigurasi ini tidak berfungsi untuk pengembangan lokal karena frontend lokal memerlukan URL backend absolut (misalnya, `http://localhost:5000/api`).
+- **Solusi Diterapkan (`client/src/services/api.js`):**
+  - `API_URL` diubah menjadi dinamis:
+    ```javascript
+    const API_URL = process.env.REACT_APP_API_URL || '/api';
+    ```
+  - **Untuk Pengembangan Lokal:**
+    - Variabel lingkungan `REACT_APP_API_URL` (misalnya, `REACT_APP_API_URL=http://localhost:5000/api`) harus diatur dalam file `.env` di direktori `client/`.
+    - Jika `REACT_APP_API_URL` ada, frontend akan menggunakan URL absolut ini.
+    - Server pengembangan React perlu di-restart setelah mengubah `.env`.
+  - **Untuk Produksi (Netlify):**
+    - `REACT_APP_API_URL` tidak akan ada (kecuali diatur secara eksplisit di Netlify, yang tidak diperlukan untuk kasus ini).
+    - `API_URL` akan default ke `'/api'`, yang akan benar ditangani oleh redirect Netlify.
+- **Hasil**: Aplikasi sekarang dapat menggunakan endpoint API yang benar secara otomatis tergantung pada lingkungan (lokal vs. produksi Netlify).
 - **File yang dimodifikasi**:
   - `client/src/services/api.js`
-  - `client/src/components/warga/WargaSidebar.js`
-- **Perubahan Perilaku:** Sidebar kartu keluarga kini selalu menampilkan data terbaru setelah ada operasi tambah/hapus/edit tanpa perlu menekan tombol refresh manual.
+- **Catatan Tambahan**: Perubahan ini aman untuk di-commit dan di-push karena dirancang untuk kompatibilitas lintas lingkungan.
