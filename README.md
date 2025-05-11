@@ -63,7 +63,6 @@ SuperAppsRTWeb/
 ├── prisma/           # Konfigurasi dan migrasi Prisma ORM
 │   └── schema.prisma
 ├── public/           # Aset statis (misal: font untuk PDF)
-├── .env.example      # Contoh variabel lingkungan root (opsional)
 ├── netlify.toml      # Konfigurasi build dan redirect Netlify
 ├── package.json      # Skrip dan dependensi root
 └── README.md         # File ini
@@ -92,11 +91,17 @@ Pastikan sistem Anda telah terinstal:
         ```bash
         cp server/.env.example server/.env
         ```
-        Kemudian, edit `server/.env` dan isi variabel `DATABASE_URL` dengan string koneksi PostgreSQL Anda dari Supabase (gunakan *Pooled Connection String*).
-        Contoh:
+        Kemudian, edit `server/.env` dan isi variabel-variabel berikut dengan nilai yang sesuai:
+        - `DATABASE_URL`: String koneksi PostgreSQL Anda dari Supabase (gunakan *Pooled Connection String*, biasanya diakhiri dengan `?pgbouncer=true&sslmode=require`).
+        - `DIRECT_URL`: String koneksi PostgreSQL langsung dari Supabase (biasanya *TIDAK* menggunakan PgBouncer, digunakan untuk migrasi Prisma, sering diakhiri dengan `?sslmode=require`).
+        - `NODE_ENV`: Atur ke `development` untuk pengembangan lokal.
+        - `FRONTEND_URL` (Opsional): Jika server lokal Anda (`server/index.js`) memerlukan URL frontend untuk konfigurasi CORS yang spesifik, Anda dapat mengaturnya di sini (misal: `http://localhost:3000`).
+
+        Contoh isi `server/.env` (ganti dengan nilai Anda):
         ```env
-        DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-SUPABASE-PROJECT-ID].supabase.co:5432/postgres?pgbouncer=true"
-        # FRONTEND_URL (Opsional untuk CORS lokal, jika berbeda dari default di server/index.js)
+        DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-SUPABASE-PROJECT-ID].supabase.co:6543/postgres?pgbouncer=true&sslmode=require"
+        DIRECT_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-SUPABASE-PROJECT-ID].supabase.co:5432/postgres?sslmode=require"
+        NODE_ENV="development"
         # FRONTEND_URL=http://localhost:3000 
         ```
 
@@ -112,17 +117,6 @@ Pastikan sistem Anda telah terinstal:
         ```
         (Port `5000` adalah port default yang digunakan oleh `server/index.js`. `/api` adalah base path API.)
 
-    *   **Root (`.env`) (Opsional, untuk Prisma CLI & CORS di Netlify)**:
-        Jika Anda menjalankan perintah Prisma CLI dari root atau memerlukan `FRONTEND_URL` untuk CORS di Netlify, Anda mungkin perlu membuat file `.env` di direktori root.
-        Salin `.env.example` (jika ada) atau buat file baru `.env`.
-        Contoh:
-        ```env
-        # Digunakan oleh Prisma CLI jika dijalankan dari root
-        DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-SUPABASE-PROJECT-ID].supabase.co:5432/postgres?pgbouncer=true"
-        # Digunakan oleh server/netlify-handler.js untuk CORS di Netlify
-        FRONTEND_URL="https://nama-situs-netlify-anda.netlify.app"
-        ```
-
 3.  **Instalasi Dependensi**
     Dari direktori root proyek, jalankan:
     ```bash
@@ -131,16 +125,21 @@ Pastikan sistem Anda telah terinstal:
     Skrip ini akan menginstal dependensi untuk direktori root, `server/`, dan `client/`, serta menjalankan `npx prisma generate` untuk menghasilkan Prisma Client.
 
 4.  **Menjalankan Migrasi Database (jika ini setup pertama kali atau ada migrasi baru)**
-    Pastikan `DATABASE_URL` di `server/.env` (atau `.env` root jika Prisma CLI dijalankan dari sana) sudah benar.
+    Pastikan variabel `DATABASE_URL` (atau lebih tepatnya `DIRECT_URL` yang sering digunakan Prisma untuk migrasi jika skema Prisma Anda dikonfigurasi untuk itu) di `server/.env` sudah benar.
+    Anda dapat menjalankan migrasi dari direktori root atau dari dalam direktori `server`.
+
+    Dari direktori root:
     ```bash
     npx prisma migrate dev --schema ./prisma/schema.prisma
     ```
-    Atau jika dari direktori `server/`:
+    Atau jika dari direktori `server/` (umumnya lebih disarankan jika `schema.prisma` ada di `prisma/` yang relatif terhadap `server/` saat konteksnya di `server`):
     ```bash
     cd server
-    npx prisma migrate dev
+    npx prisma migrate dev 
+    # (Prisma CLI akan mencari schema.prisma di ../prisma/ atau ./prisma/ relatif terhadap server/)
     cd ..
     ```
+    Jika Prisma CLI dijalankan dari root, ia mungkin memerlukan `DATABASE_URL` di `.env` root jika tidak dapat menemukannya secara otomatis atau jika skrip Anda tidak mengatur path ke `server/.env`. Untuk kesederhanaan, pastikan `server/.env` memiliki `DIRECT_URL` yang benar, dan jika `prisma/schema.prisma` Anda menggunakan `env("DIRECT_URL")` untuk datasource provider migrasi, maka Prisma akan menggunakannya.
 
 5.  **Menjalankan Aplikasi (Backend & Frontend Bersamaan)**
     Dari direktori root proyek, jalankan:
@@ -176,7 +175,7 @@ Anda juga dapat menjalankan frontend dan backend secara independen:
 - **Backend**: Dideploy sebagai Netlify Functions. Kode sumber utama fungsi ada di `server/netlify-handler.js` yang membungkus aplikasi Express.js.
 - **Frontend**: Dideploy sebagai situs statis di Netlify, dibangun dari direktori `client`.
 - **Konfigurasi**: File `netlify.toml` di root proyek mengatur perintah build, direktori publikasi, direktori fungsi, dan aturan redirect (termasuk proxy untuk API).
-- **Variabel Lingkungan di Netlify**: Pastikan variabel lingkungan seperti `DATABASE_URL` (untuk backend/fungsi) dan `FRONTEND_URL` (untuk CORS backend) telah dikonfigurasi di UI Netlify.
+- **Variabel Lingkungan di Netlify**: Pastikan variabel lingkungan seperti `DATABASE_URL`, `DIRECT_URL` (jika diperlukan oleh proses build/migrasi di Netlify), `NODE_ENV="production"`, dan `FRONTEND_URL` (untuk CORS backend) telah dikonfigurasi di UI Netlify.
 
 --- 
 
