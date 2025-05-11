@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Gunakan variabel lingkungan untuk API_URL, dengan fallback ke localhost untuk development
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// API base URL akan menjadi path relatif
+// Ini akan menggunakan domain yang sama dengan frontend
+// dan mengandalkan redirect Netlify untuk /api/*
+const API_URL = '/api'; // Cukup seperti ini
 
 // Create axios instance
 const api = axios.create({
